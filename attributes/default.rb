@@ -1,8 +1,8 @@
 #
 # Cookbook Name:: mingw
-# Recipe:: default
+# Attributes:: default
 #
-# Copyright 2016 Chef Software, Inc.
+# Copyright 2016, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
-include_recipe 'mingw::install32' if node['mingw']['path32']
-include_recipe 'mingw::install64' if node['mingw']['path64']
+default['mingw']['root32'] = nil
+default['mingw']['root64'] = nil

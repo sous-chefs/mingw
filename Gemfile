@@ -15,10 +15,8 @@ group :unit do
   gem 'chefspec', '~> 4.6'
 end
 
-group :kitchen_common do
+group :kitchen do
   gem 'test-kitchen', '~> 1.7'
-end
-
-group :kitchen_vagrant do
   gem 'kitchen-vagrant', '~> 0.20'
+  gem 'winrm-fs'
 end

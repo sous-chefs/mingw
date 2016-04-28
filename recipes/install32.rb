@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: mingw
-# Recipe:: default
+# Recipe:: install32
 #
 # Copyright 2016 Chef Software, Inc.
 #
@@ -16,5 +16,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include_recipe 'mingw::install32' if node['mingw']['path32']
-include_recipe 'mingw::install64' if node['mingw']['path64']
+include_recipe 'seven_zip::default'
+
+root_path = node['mingw']['path32']
+
+mingw_get 'msys core - 32 bit' do
+  package 'msys-base=2013072300-msys-bin.meta'
+  root root_path
+end
+
+mingw_get 'msys core extensions - 32 bit' do
+  package 'msys-core-utils-ext=5.97-3-*'
+  root root_path
+end
+
+mingw_get 'msys perl - 32 bit' do
+  package 'msys-perl-bin=5.8.8-*'
+  root root_path
+end
+
+mingw_tdm_gcc 'TDM GCC - 32 bit' do
+  version '5.1.0'
+  flavor :sjlj_32
+  root root_path
+end

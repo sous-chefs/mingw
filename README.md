@@ -18,6 +18,42 @@ Installs a mingw/msys based compiler tools chain on windows. This is required fo
 
 - seven_zip
 
+## Attributes
+
+- `node['mingw']['path32']`  The root path where a 32-bit compiler is installed.
+  No compiler is installed if it is nil. Default: nil.
+- `node['mingw']['path64']`  The root path where a 64-bit compiler is installed.
+  No compiler is installed if it is nil. Default: nil.
+
+## Usage
+
+If you wih to install a default compiler toolchain for your platform,
+add the default mingw recipe to your run list:
+
+```sh
+knife node run_list add NODE "recipe[mingw::default]"
+```
+
+or add this cookbook as a dependency to your cookbook in its `metadata.rb`
+and include the default recipe in one of your recipes.
+
+```ruby
+# metadata.rb
+depends 'mingw'
+```
+
+```ruby
+# your recipe.rb
+include_recipe 'mingw::default'
+```
+
+Remember to override the attributes above if you want the cookbook to
+install a compiler.
+
+If you wish to customize what gets installed and where it does so,
+then use the `mingw_get` resource in any recipe to fetch mingw packages.
+Use the `mingw_tdm_gcc` resource to fetch a version of the TDM GCC compiler.
+
 ## Resources
 
 ### mingw_get
@@ -64,21 +100,11 @@ end
 To get the 32-bit TDM GCC compiler in `C:\mingw32'
 
 ```ruby
-mingw_tdm_gcc '5.1.0'
+mingw_tdm_gcc '5.1.0' do
+  flavor :sjlj_32
   root 'C:\mingw32'
 end
 ```
-
-## Usage
-
-Add this cookbook as a dependency to your cookbook in its `metadata.rb`
-
-```ruby
-depends 'mingw'
-```
-
-Then use the `mingw_get` resource to fetch any recipe to fetch mingw packages.
-Use the `mingw_tdm_gcc` resource to fetch a version of the TDM GCC compiler.
 
 ## License & Authors
 

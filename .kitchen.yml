@@ -19,3 +19,7 @@ suites:
   - name: default
     run_list:
       - recipe[mingw::default]
+    attributes:
+      mingw:
+        path32: C:/mingw32
+        path64: C:/mingw64

@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: mingw
-# Library:: helper
+# Recipe:: install64
 #
 # Copyright 2016 Chef Software, Inc.
 #
@@ -16,20 +16,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'uri'
+include_recipe 'seven_zip::default'
 
-module Mingw
-  module Helper
-    def archive_name(source)
-      url = ::URI.parse(source)
-      ::File.basename(::URI.unescape(url.path))
-    end
+root_path = node['mingw']['path64']
 
-    def tar_name(source)
-      aname = archive_name(source)
-      ::File.basename(aname, ::File.extname(aname))
-    end
-  end
+mingw_get 'msys core - 64 bit' do
+  package 'msys-base=2013072300-msys-bin.meta'
+  root root_path
 end
 
-Chef::Recipe.send(:include, Mingw::Helper)
+mingw_get 'msys core extensions - 64 bit' do
+  package 'msys-core-utils-ext=5.97-3-*'
+  root root_path
+end
+
+mingw_get 'msys perl - 64 bit' do
+  package 'msys-perl-bin=5.8.8-*'
+  root root_path
+end
+
+mingw_tdm_gcc 'TDM GCC - 64 bit' do
+  version '5.1.0'
+  flavor :seh_sjlj_64
+  root root_path
+end

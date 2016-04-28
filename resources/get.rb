@@ -26,16 +26,16 @@ property :root, kind_of: String, required: true
 default_action :install
 
 action :install do
-  seven_zip_archive 'mingw-get' do
+  seven_zip_archive "fetching mingw-get to #{root}" do
     source 'http://iweb.dl.sourceforge.net/project/mingw/Installer/mingw-get/mingw-get-0.6.2-beta-20131004-1/mingw-get-0.6.2-mingw32-beta-20131004-1-bin.zip'
     path root
     checksum '2e0e9688d42adc68c5611759947e064156e169ff871816cae52d33ee0655826d'
     not_if do
-      File.exist?(File.join(root, 'bin/mingw-get.exe'))
+      ::File.exist?(::File.join(root, 'bin/mingw-get.exe'))
     end
   end
 
-  execute 'mingw-get.exe' do
+  execute "installing #{package}" do
     command ".\\bin\\mingw-get.exe -v install #{package}"
     cwd root
   end
