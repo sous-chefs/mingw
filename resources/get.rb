@@ -23,6 +23,8 @@
 property :package, kind_of: String, name_property: true
 property :root, kind_of: String, required: true
 
+default_action :install
+
 action :install do
   seven_zip_archive 'mingw-get' do
     source 'http://iweb.dl.sourceforge.net/project/mingw/Installer/mingw-get/mingw-get-0.6.2-beta-20131004-1/mingw-get-0.6.2-mingw32-beta-20131004-1-bin.zip'

@@ -23,6 +23,8 @@ property :flavor, kind_of: Symbol, is: [:sjlj_32, :seh_sjlj_64], default: :seh_s
 property :root, kind_of: String, required: true
 property :version, kind_of: String, is: ['5.1.0'], name_property: true
 
+default_action :install
+
 tdm_gcc_64 = {
   'http://iweb.dl.sourceforge.net/project/tdm-gcc/TDM-GCC%205%20series/5.1.0-tdm64-1/gcc-5.1.0-tdm64-1-core.tar.lzma' =>
     '29393aac890847089ad1e93f81a28f6744b1609c00b25afca818f3903e42e4bd',
