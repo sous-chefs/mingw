@@ -11,11 +11,11 @@ provisioner:
 #   name: inspec
 
 platforms:
-  - name: ubuntu-14.04
-  - name: centos-7.1
+  - name: windows-2012r2
+    driver_config:
+      box: chef/windows-server-2012r2-standard
 
 suites:
   - name: default
     run_list:
       - recipe[mingw::default]
-    attributes:
