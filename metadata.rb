@@ -9,7 +9,6 @@ version '0.1.0'
 supports 'windows'
 
 depends 'seven_zip'
-depends 'windows'
 
 source_url 'https://github.com/chef-cookbooks/mingw'
 issues_url 'https://github.com/chef-cookbooks/mingw/issues'
