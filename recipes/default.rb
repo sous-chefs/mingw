@@ -16,5 +16,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include_recipe 'mingw::install32' if node['mingw']['path32']
-include_recipe 'mingw::install64' if node['mingw']['path64']
+include_recipe 'seven_zip::default'

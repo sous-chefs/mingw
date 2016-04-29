@@ -67,14 +67,14 @@ action :install do
     end
 
   to_fetch.each do |url, hash|
-    seven_zip_archive "cache #{archive_name(url)} to #{cache_dir}" do
+    seven_zip_archive "cache #{archive_name(url)} to #{win_friendly_path(cache_dir)}" do
       source url
       path cache_dir
       checksum hash
       overwrite true
     end
 
-    seven_zip_archive "extract #{tar_name(url)} to #{root}" do
+    seven_zip_archive "extract #{tar_name(url)} to #{win_friendly_path(root)}" do
       source ::File.join(cache_dir, tar_name(url))
       path root
       overwrite true
