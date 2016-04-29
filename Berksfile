@@ -7,5 +7,5 @@ source 'https://supermarket.chef.io'
 metadata
 
 group :integration do
-	fixture 'tdm_install'
+  fixture 'tdm_install'
 end

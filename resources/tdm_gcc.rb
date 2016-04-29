@@ -23,6 +23,7 @@ property :flavor, kind_of: Symbol, is: [:sjlj_32, :seh_sjlj_64], default: :seh_s
 property :root, kind_of: String, required: true
 property :version, kind_of: String, is: ['5.1.0'], name_property: true
 
+resource_name :mingw_tdm_gcc
 default_action :install
 
 tdm_gcc_64 = {
@@ -48,11 +49,13 @@ action :install do
   f_root = win_friendly_path(root)
 
   if flavor == :sjlj_32
-    [ 'binutils-bin=2.25.1',
+    [
+      'binutils-bin=2.25.1',
       'libintl-dll=0.18.3.2',
       'mingwrt-dll=3.21.1',
       'mingwrt-dev=3.21.1',
-      'w32api-dev=3.17' ].each do |package_fragment|
+      'w32api-dev=3.17'
+    ].each do |package_fragment|
       mingw_get "install #{package_fragment} at #{f_root}" do
         package "mingw32-#{package_fragment}-*"
         root new_resource.root
