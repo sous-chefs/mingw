@@ -1,6 +1,6 @@
 #
-# Cookbook Name:: mingw
-# Recipe:: default
+# Cookbook Name:: mingw_install_tdm
+# Recipe:: install64
 #
 # Copyright 2016 Chef Software, Inc.
 #
@@ -16,4 +16,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include_recipe 'seven_zip::default'
+include_recipe 'mingw::default'
+
+root_path = "#{ENV['SYSTEMDRIVE']}\\mingw64"
+
+mingw_get 'msys core - 64 bit' do
+  package 'msys-base=2013072300-msys-bin.meta'
+  root root_path
+end
+
+mingw_get 'msys core extensions - 64 bit' do
+  package 'msys-core-utils-ext=5.97-3-*'
+  root root_path
+end
+
+mingw_get 'msys perl - 64 bit' do
+  package 'msys-perl-bin=5.8.8-*'
+  root root_path
+end
+
+mingw_tdm_gcc 'TDM GCC - 64 bit' do
+  version '5.1.0'
+  flavor :seh_sjlj_64
+  root root_path
+end

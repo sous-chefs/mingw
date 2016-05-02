@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: mingw
-# Attributes:: default
+# Library:: _helper
 #
 # Copyright 2016, Chef Software, Inc.
 #
@@ -17,5 +17,12 @@
 # limitations under the License.
 #
 
-default['mingw']['root32'] = nil
-default['mingw']['root64'] = nil
+module Mingw
+  module Helper
+    def win_friendly_path(path)
+      path.gsub(::File::SEPARATOR, ::File::ALT_SEPARATOR || '\\') if path
+    end
+  end
+end
+
+Chef::Resource.send(:include, Mingw::Helper)

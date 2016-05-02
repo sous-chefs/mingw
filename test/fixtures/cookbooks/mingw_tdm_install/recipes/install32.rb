@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: mingw
+# Cookbook Name:: mingw_install_tdm
 # Recipe:: install32
 #
 # Copyright 2016 Chef Software, Inc.
@@ -16,9 +16,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include_recipe 'seven_zip::default'
+include_recipe 'mingw::default'
 
-root_path = node['mingw']['path32']
+root_path = "#{ENV['SYSTEMDRIVE']}\\mingw32"
 
 mingw_get 'msys core - 32 bit' do
   package 'msys-base=2013072300-msys-bin.meta'
