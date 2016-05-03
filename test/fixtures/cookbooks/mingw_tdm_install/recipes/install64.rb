@@ -26,7 +26,7 @@ mingw_get 'msys core - 64 bit' do
 end
 
 mingw_get 'msys core extensions - 64 bit' do
-  package 'msys-core-utils-ext=5.97-3-*'
+  package 'msys-coreutils-ext=5.97-3-*'
   root root_path
 end
 
