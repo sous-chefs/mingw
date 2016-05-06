@@ -87,6 +87,19 @@ action :install do
       overwrite true
     end
   end
+
+  # Patch time.h headers for compatibility with winpthreads.
+  # These patches were made for binutils 2.25.1 for 32-bit TDM GCC only.
+  if flavor == :sjlj_32
+    include_dir = win_friendly_path(::File.join(root, 'include'))
+    cookbook_file "#{include_dir}\\pthread.h" do
+      source 'pthread.h'
+    end
+
+    cookbook_file "#{include_dir}\\time.h" do
+      source 'time.h'
+    end
+  end
 end
 
 def archive_name(source)
