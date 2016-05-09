@@ -27,6 +27,18 @@ resource_name :mingw_get
 default_action :install
 
 action :install do
+  run_action('install')
+end
+
+action :upgrade do
+  run_action('upgrade')
+end
+
+action :remove do
+  run_action('remove')
+end
+
+def run_action(action_cmd)
   seven_zip_archive "fetching mingw-get to #{win_friendly_path(root)}" do
     source 'http://iweb.dl.sourceforge.net/project/mingw/Installer/mingw-get/mingw-get-0.6.2-beta-20131004-1/mingw-get-0.6.2-mingw32-beta-20131004-1-bin.zip'
     path root
@@ -37,7 +49,7 @@ action :install do
   end
 
   execute "installing #{package}" do
-    command ".\\bin\\mingw-get.exe -v install #{package}"
+    command ".\\bin\\mingw-get.exe -v #{action_cmd} #{package}"
     cwd root
   end
 end
