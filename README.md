@@ -42,6 +42,8 @@ Use the `mingw_tdm_gcc` resource to fetch a version of the TDM GCC compiler.
 
 #### Actions
 - `:install` - Installs a mingw package from sourceforge using mingw-get.exe.
+- `:remove` - Uninstalls a mingw package.
+- `:upgrade` - Upgrades a mingw package (even to a lower version).
 
 #### Parameters
 - `package` - A mingw-get package (or meta-package) to fetch and install.
