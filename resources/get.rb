@@ -26,30 +26,33 @@ property :root, kind_of: String, required: true
 resource_name :mingw_get
 default_action :install
 
+action_class do
+  def mingw_do_action(action_cmd)
+    seven_zip_archive "fetching mingw-get to #{win_friendly_path(root)}" do
+      source 'http://iweb.dl.sourceforge.net/project/mingw/Installer/mingw-get/mingw-get-0.6.2-beta-20131004-1/mingw-get-0.6.2-mingw32-beta-20131004-1-bin.zip'
+      path root
+      checksum '2e0e9688d42adc68c5611759947e064156e169ff871816cae52d33ee0655826d'
+      not_if do
+        ::File.exist?(::File.join(root, 'bin/mingw-get.exe'))
+      end
+    end
+
+    execute "installing #{package}" do
+      command ".\\bin\\mingw-get.exe -v #{action_cmd} #{package}"
+      cwd root
+    end
+  end
+end
+
 action :install do
-  run_action('install')
+  mingw_do_action('install')
 end
 
 action :upgrade do
-  run_action('upgrade')
+  mingw_do_action('upgrade')
 end
 
 action :remove do
-  run_action('remove')
+  mingw_do_action('remove')
 end
 
-def run_action(action_cmd)
-  seven_zip_archive "fetching mingw-get to #{win_friendly_path(root)}" do
-    source 'http://iweb.dl.sourceforge.net/project/mingw/Installer/mingw-get/mingw-get-0.6.2-beta-20131004-1/mingw-get-0.6.2-mingw32-beta-20131004-1-bin.zip'
-    path root
-    checksum '2e0e9688d42adc68c5611759947e064156e169ff871816cae52d33ee0655826d'
-    not_if do
-      ::File.exist?(::File.join(root, 'bin/mingw-get.exe'))
-    end
-  end
-
-  execute "installing #{package}" do
-    command ".\\bin\\mingw-get.exe -v #{action_cmd} #{package}"
-    cwd root
-  end
-end

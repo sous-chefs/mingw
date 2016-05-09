@@ -93,10 +93,12 @@ action :install do
   if flavor == :sjlj_32
     include_dir = win_friendly_path(::File.join(root, 'include'))
     cookbook_file "#{include_dir}\\pthread.h" do
+      cookbook 'mingw'
       source 'pthread.h'
     end
 
     cookbook_file "#{include_dir}\\time.h" do
+      cookbook 'mingw'
       source 'time.h'
     end
   end
