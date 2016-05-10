@@ -55,4 +55,3 @@ end
 action :remove do
   mingw_do_action('remove')
 end
-
