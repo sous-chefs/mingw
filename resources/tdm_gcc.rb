@@ -24,7 +24,6 @@ property :root, kind_of: String, required: true
 property :version, kind_of: String, is: ['5.1.0'], name_property: true
 
 resource_name :mingw_tdm_gcc
-default_action :install
 
 tdm_gcc_64 = {
   'http://iweb.dl.sourceforge.net/project/tdm-gcc/TDM-GCC%205%20series/5.1.0-tdm64-1/gcc-5.1.0-tdm64-1-core.tar.lzma' =>
