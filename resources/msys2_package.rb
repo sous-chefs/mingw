@@ -34,7 +34,7 @@ action_class do
   def msys2_exec(comment, cmd)
     f_root = win_friendly_path(root)
     execute comment do
-      command ".\\msys2_shell.bat -c \"#{cmd}\""
+      command ".\\bin\\bash.bat -l -c \"#{cmd}\""
       cwd f_root
     end
   end
@@ -48,7 +48,7 @@ action_class do
       seven_zip_archive "cache msys2 base to #{f_cache_dir}" do
         source url
         path f_cache_dir
-        checksum ''
+        checksum '7e97e2af042e1b6f62cf0298fe84839014ef3d4a3e7825cffc6931c66cc0fc20'
       end
 
       seven_zip_archive "extract msys2 base archive to #{f_cache_dir}" do
@@ -64,21 +64,40 @@ action_class do
       end
     end
 
+    home_dir = ::File.join(root, 'home', ENV['USERNAME'])
+    bin_dir = ::File.join(root, 'bin')
+    updated_marker_file = ::File.join(root, 'updated-core')
+
+    directory win_friendly_path(bin_dir)
+
+    cookbook_file win_friendly_path("#{bin_dir}/bash.bat") do
+      source 'bash.bat'
+      cookbook 'mingw'
+    end
+
     # During first run, msys initialized the /home/user directory with files
     # from /etc/skel.  It also does a number of other first time setup steps.
     # The shell must be restarted and cannot be reused.
-    unless ::File.exist?(::File.join(root, 'home', ENV['USERNAME']))
-      msys2_exec('msys2 first time init', 'exit')
-    end
+    msys2_exec('msys2 first time init', 'exit') unless ::File.exist?(home_dir)
 
     # Update pacman and msys base packages.
-    if ::File.exist?(::File.join(root, 'usr/bin/update-core'))
+    # TODO: Why is this file not going away - debug this later.
+    # unless ::File.exist?(::File.join(root, 'usr/bin/update-core'))
+    unless ::File.exist?(updated_marker_file)
       msys2_exec('sync msys2 packages', 'pacman -Sy')
       msys2_exec('upgrade msys2 core packages', 'pacman -S --noconfirm --needed bash pacman msys2-runtime msys2-runtime-devel')
       msys2_exec('upgrade entire msys2 system', 'pacman -Suu --noconfirm')
       # Sometimes this step seems to be necessary.  Unsure why..
       # Not doing this results in only a few packages getting upgraded.
       msys2_exec('upgrade entire msys2 system', 'pacman -Syu --noconfirm')
+      file win_friendly_path(updated_marker_file) do
+        action :touch
+      end
+    end
+
+    cookbook_file win_friendly_path("#{home_dir}/.bash_profile") do
+      source 'bash_profile'
+      cookbook 'mingw'
     end
   end
 
