@@ -42,17 +42,18 @@ action_class do
   def msys2_init
     cache_dir = ::File.join(root, '.cache')
     f_cache_dir = win_friendly_path(cache_dir)
-    url = 'http://iweb.dl.sourceforge.net/project/msys2/Base/x86_64/msys2-base-x86_64-20160205.tar.xz'
+    base_url = 'http://iweb.dl.sourceforge.net/project/msys2/Base/x86_64/msys2-base-x86_64-20160205.tar.xz'
+    base_checksum = '7e97e2af042e1b6f62cf0298fe84839014ef3d4a3e7825cffc6931c66cc0fc20'
 
     unless ::File.exist?(::File.join(root, 'msys2.exe'))
       seven_zip_archive "cache msys2 base to #{f_cache_dir}" do
-        source url
+        source base_url
         path f_cache_dir
-        checksum '7e97e2af042e1b6f62cf0298fe84839014ef3d4a3e7825cffc6931c66cc0fc20'
+        checksum base_checksum
       end
 
       seven_zip_archive "extract msys2 base archive to #{f_cache_dir}" do
-        source "#{f_cache_dir}\\#{tar_name(url)}"
+        source "#{f_cache_dir}\\#{tar_name(base_url)}"
         path f_cache_dir
         overwrite true
       end
