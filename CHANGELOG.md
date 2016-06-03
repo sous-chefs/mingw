@@ -2,6 +2,9 @@
 
 This file is used to list changes made in each version of the mingw cookbook.
 
+## v1.1.0 (2016-06-03)
+- Add msys2 based compiler support using the new msys2_package resource
+
 ## v1.0.0 (2016-05-11)
 
 - Remove unnecessary default_action from the resources
