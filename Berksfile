@@ -8,4 +8,5 @@ metadata
 
 group :integration do
   fixture 'tdm_install'
+  fixture 'msys2_install'
 end
