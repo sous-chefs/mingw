@@ -22,3 +22,6 @@ suites:
   - name: tools64
     run_list:
       - recipe[mingw_tdm_install::install64]
+  - name: msys2_tools64
+    run_list:
+      - recipe[mingw_msys2_install::default]

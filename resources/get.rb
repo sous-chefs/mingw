@@ -36,7 +36,7 @@ action_class do
       end
     end
 
-    execute "installing #{package}" do
+    execute "performing #{action_cmd} for #{package}" do
       command ".\\bin\\mingw-get.exe -v #{action_cmd} #{package}"
       cwd root
     end

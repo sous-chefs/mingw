@@ -1,0 +1,10 @@
+# set by bash.bat shim file to accurately set the current directory.
+if [ -n "$ORIGINAL_PWD" ] ; then
+  cd $ORIGINAL_PWD
+  unset ORIGINAL_PWD
+fi
+
+# source the users bashrc if it exists
+if [ -f "${HOME}/.bashrc" ] ; then
+  source "${HOME}/.bashrc"
+fi

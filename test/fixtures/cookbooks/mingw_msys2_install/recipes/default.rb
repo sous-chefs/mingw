@@ -1,8 +1,8 @@
 #
-# Cookbook Name:: mingw
-# Library:: _helper
+# Cookbook Name:: mingw_msys2_install
+# Recipe:: default
 #
-# Copyright 2016, Chef Software, Inc.
+# Copyright 2016 Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,24 +15,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
-module Mingw
-  module Helper
-    def win_friendly_path(path)
-      path.gsub(::File::SEPARATOR, ::File::ALT_SEPARATOR || '\\') if path
-    end
+include_recipe 'mingw::default'
 
-    def archive_name(source)
-      url = ::URI.parse(source)
-      ::File.basename(::URI.unescape(url.path))
-    end
+root_path = "#{ENV['SYSTEMDRIVE']}\\msys2"
 
-    def tar_name(source)
-      aname = archive_name(source)
-      ::File.basename(aname, ::File.extname(aname))
-    end
-  end
+msys2_package 'base-devel' do
+  root root_path
 end
 
-Chef::Resource.send(:include, Mingw::Helper)
+msys2_package 'mingw-w64-x86_64-toolchain' do
+  root root_path
+end
