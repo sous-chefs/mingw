@@ -31,11 +31,18 @@ property :root, kind_of: String, required: true
 resource_name :msys2_package
 
 action_class do
+  #
+  # Runs a command through a bash login shell made by our shim .bat file.
+  # The bash.bat file defaults %HOME% to #{root}/home/%USERNAME% and requests
+  # that the command be run in the current working directory.
+  #
   def msys2_exec(comment, cmd)
     f_root = win_friendly_path(root)
     execute comment do
-      command ".\\bin\\bash.bat -l -c \"#{cmd}\""
+      command ".\\bin\\bash.bat -c \"#{cmd}\""
       cwd f_root
+      environment('MSYSTEM' => 'MSYS')
+      live_stream true
     end
   end
 
@@ -50,6 +57,7 @@ action_class do
         source base_url
         path f_cache_dir
         checksum base_checksum
+        overwrite true
       end
 
       seven_zip_archive "extract msys2 base archive to #{f_cache_dir}" do
@@ -65,7 +73,7 @@ action_class do
       end
     end
 
-    home_dir = ::File.join(root, 'home', ENV['USERNAME'])
+    pacman_key_dir = ::File.join(root, 'etc/pacman.d/gnupg')
     bin_dir = ::File.join(root, 'bin')
     updated_marker_file = ::File.join(root, 'updated-core')
 
@@ -76,29 +84,27 @@ action_class do
       cookbook 'mingw'
     end
 
-    # During first run, msys initialized the /home/user directory with files
-    # from /etc/skel.  It also does a number of other first time setup steps.
-    # The shell must be restarted and cannot be reused.
-    msys2_exec('msys2 first time init', 'exit') unless ::File.exist?(home_dir)
+    # During first run, msys initializes some pacman system state and mirror
+    # state.  It also creates a home directory for your user based on what
+    # $HOME is using files from /etc/skel.  The home-directory creation step
+    # will automatically be performed if other users log in - so if you wish
+    # to globally modify user first time setup, edit /etc/skel or add
+    # "post-setup" steps to /etc/post-install/
+    # The first-time init shell must be restarted and cannot be reused.
+    msys2_exec('msys2 first time init', 'exit') unless ::File.exist?(pacman_key_dir)
 
     # Update pacman and msys base packages.
-    # TODO: Why is this file not going away - debug this later.
-    # unless ::File.exist?(::File.join(root, 'usr/bin/update-core'))
     unless ::File.exist?(updated_marker_file)
-      msys2_exec('sync msys2 packages', 'pacman -Sy')
-      msys2_exec('upgrade msys2 core packages', 'pacman -S --noconfirm --needed bash pacman msys2-runtime msys2-runtime-devel')
-      msys2_exec('upgrade entire msys2 system', 'pacman -Suu --noconfirm')
-      # Sometimes this step seems to be necessary.  Unsure why..
-      # Not doing this results in only a few packages getting upgraded.
-      msys2_exec('upgrade entire msys2 system', 'pacman -Syu --noconfirm')
+      # These two command must be run together in the same shell since the
+      # pacman binaries/paths are being replaced.
+      msys2_exec('upgrade msys2 core: 1', '/usr/bin/pacman -Sy && /usr/bin/pacman -S --noconfirm --needed bash pacman msys2-runtime msys2-runtime-devel')
+      # This will blow away some shell symlinks and upgrade core system packages.
+      msys2_exec('upgrade msys2 core: 2', 'pacman -Suu --noconfirm')
+      # Now we can actually upgrade everything ever.
+      msys2_exec('upgrade entire msys2 system', 'pacman -Syuu --noconfirm')
       file win_friendly_path(updated_marker_file) do
         action :touch
       end
-    end
-
-    cookbook_file win_friendly_path("#{home_dir}/.bash_profile") do
-      source 'bash_profile'
-      cookbook 'mingw'
     end
   end
 
