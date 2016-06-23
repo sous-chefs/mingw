@@ -39,10 +39,10 @@ action_class do
   def msys2_exec(comment, cmd)
     f_root = win_friendly_path(root)
     execute comment do
-      command ".\\bin\\bash.bat -c \"#{cmd}\""
+      command ".\\bin\\bash.bat -c '#{cmd}'"
       cwd f_root
-      environment('MSYSTEM' => 'MSYS')
       live_stream true
+      environment('MSYSTEM' => 'MSYS')
     end
   end
 
@@ -68,14 +68,17 @@ action_class do
 
       ruby_block 'copy msys2 base files to root' do
         block do
-          ::FileUtils.cp_r("#{cache_dir}/msys64/.", root)
+          # Oh my god msys2 and pacman are picky as hell when it comes to
+          # updating core files. They use the mtime on certain files to
+          # determine if they need to updated or not and simply skip various
+          # steps otherwise.
+          ::FileUtils.cp_r(::Dir.glob("#{cache_dir}/msys64/*"), root, preserve: true)
         end
       end
     end
 
     pacman_key_dir = ::File.join(root, 'etc/pacman.d/gnupg')
     bin_dir = ::File.join(root, 'bin')
-    updated_marker_file = ::File.join(root, 'updated-core')
 
     directory win_friendly_path(bin_dir)
 
@@ -84,8 +87,11 @@ action_class do
       cookbook 'mingw'
     end
 
-    # During first run, msys initializes some pacman system state and mirror
-    # state.  It also creates a home directory for your user based on what
+    cookbook_file win_friendly_path(::File.join(root, 'custom-upgrade.sh')) do
+      source 'custom-upgrade.sh'
+      cookbook 'mingw'
+    end
+
     # $HOME is using files from /etc/skel.  The home-directory creation step
     # will automatically be performed if other users log in - so if you wish
     # to globally modify user first time setup, edit /etc/skel or add
@@ -94,17 +100,11 @@ action_class do
     msys2_exec('msys2 first time init', 'exit') unless ::File.exist?(pacman_key_dir)
 
     # Update pacman and msys base packages.
-    unless ::File.exist?(updated_marker_file)
-      # These two command must be run together in the same shell since the
-      # pacman binaries/paths are being replaced.
-      msys2_exec('upgrade msys2 core: 1', '/usr/bin/pacman -Sy && /usr/bin/pacman -S --noconfirm --needed bash pacman msys2-runtime msys2-runtime-devel')
-      # This will blow away some shell symlinks and upgrade core system packages.
-      msys2_exec('upgrade msys2 core: 2', 'pacman -Suu --noconfirm')
+    if ::File.exist?(::File.join(root, 'usr/bin/update-core')) || !::File.exist?(::File.join(root, 'custom-upgrade.sh'))
+      msys2_exec('upgrade msys2 core', '/custom-upgrade.sh')
+      msys2_exec('upgrade msys2 core: part 2', 'pacman -Suu --noconfirm')
       # Now we can actually upgrade everything ever.
       msys2_exec('upgrade entire msys2 system', 'pacman -Syuu --noconfirm')
-      file win_friendly_path(updated_marker_file) do
-        action :touch
-      end
     end
   end
 
@@ -115,7 +115,7 @@ action_class do
 end
 
 action :install do
-  msys2_do_action("installing #{package}", "pacman -S --noconfirm #{package}")
+  msys2_do_action("installing #{package}", "pacman -S --needed --noconfirm #{package}")
 end
 
 # Package name is ignored.  This is arch.  Why would you ever upgrade a single
