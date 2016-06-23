@@ -2,6 +2,11 @@
 
 This file is used to list changes made in each version of the mingw cookbook.
 
+## v1.2.1 (2016-06-23)
+- Fix msys2 initial install/upgrade steps that dependended on file modification time.
+- Make msys2_package :install idempotent - it should not reinstall packages.
+- Do not allow bash.exe to be called if MSYSTEM is undefined.
+
 ## v1.2.0 (2016-06-03)
 - Updating to fix the issue where msys2 bash does not inherit the cwd correctly
 
