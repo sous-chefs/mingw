@@ -2,6 +2,9 @@
 
 This file is used to list changes made in each version of the mingw cookbook.
 
+## v1.2.2 (2016-06-24)
+- Download msys2 from the primary download url (instead of a specific mirror).
+
 ## v1.2.1 (2016-06-23)
 - Fix msys2 initial install/upgrade steps that dependended on file modification time.
 - Make msys2_package :install idempotent - it should not reinstall packages.
