@@ -2,6 +2,9 @@
 
 This file is used to list changes made in each version of the mingw cookbook.
 
+## v1.2.3 (2016-07-25)
+- If PKG_CONFIG_PATH is already defined, honor it in the msys2 shell.
+
 ## v1.2.2 (2016-06-24)
 - Download msys2 from the primary download url (instead of a specific mirror).
 
