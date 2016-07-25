@@ -92,6 +92,11 @@ action_class do
       cookbook 'mingw'
     end
 
+    cookbook_file win_friendly_path(::File.join(root, 'etc/profile.d/custom_pkg_config.sh')) do
+      source 'custom_pkg_config.sh'
+      cookbook 'mingw'
+    end
+
     # $HOME is using files from /etc/skel.  The home-directory creation step
     # will automatically be performed if other users log in - so if you wish
     # to globally modify user first time setup, edit /etc/skel or add
@@ -104,7 +109,9 @@ action_class do
       msys2_exec('upgrade msys2 core', '/custom-upgrade.sh')
       msys2_exec('upgrade msys2 core: part 2', 'pacman -Suu --noconfirm')
       # Now we can actually upgrade everything ever.
-      msys2_exec('upgrade entire msys2 system', 'pacman -Syuu --noconfirm')
+      msys2_exec('upgrade entire msys2 system: 1', 'pacman -Syuu --noconfirm')
+      # Might need to do it once more to pick up a few stragglers.
+      msys2_exec('upgrade entire msys2 system: 2', 'pacman -Syuu --noconfirm')
     end
   end
 
