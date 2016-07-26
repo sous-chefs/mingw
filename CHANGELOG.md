@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of the mingw cookbook.
 
+## v1.2.4 (2016-07-26)
+- New msys2 shells do not inherit PATH from windows. Provide a way for
+  clients to do this.
+
 ## v1.2.3 (2016-07-25)
 - If PKG_CONFIG_PATH is already defined, honor it in the msys2 shell.
 
