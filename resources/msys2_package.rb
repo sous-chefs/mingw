@@ -92,8 +92,8 @@ action_class do
       cookbook 'mingw'
     end
 
-    cookbook_file win_friendly_path(::File.join(root, 'etc/profile.d/custom_pkg_config.sh')) do
-      source 'custom_pkg_config.sh'
+    cookbook_file win_friendly_path(::File.join(root, 'etc/profile.d/custom_prefix.sh')) do
+      source 'custom_prefix.sh'
       cookbook 'mingw'
     end
 
