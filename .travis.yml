@@ -5,18 +5,22 @@ dist: trusty
 addons:
   apt:
     sources:
-      - chef-current-precise
+      - chef-current-trusty
     packages:
       - chefdk
 
+# Don't `bundle install` which takes about 1.5 mins
 install: echo "skip bundle install"
 
+branches:
+  only:
+    - master
 before_script:
   - eval "$(/opt/chefdk/bin/chef shell-init bash)"
 
 script:
   - /opt/chefdk/embedded/bin/chef --version
-  - /opt/chefdk/embedded/bin/chef exec rubocop --version
+  - /opt/chefdk/embedded/bin/chef exec cookstyle --version
   - /opt/chefdk/embedded/bin/chef exec foodcritic --version
   - /opt/chefdk/embedded/bin/chef exec rake style
   - /opt/chefdk/embedded/bin/chef exec rake spec
