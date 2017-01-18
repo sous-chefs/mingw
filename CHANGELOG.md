@@ -2,17 +2,25 @@
 
 This file is used to list changes made in each version of the mingw cookbook.
 
+## 1.2.5 (2017-01-18)
+
+- Require a working compat_resource
+
 ## v1.2.4 (2016-07-26)
+
 - New msys2 shells do not inherit PATH from windows. Provide a way for
   clients to do this.
 
 ## v1.2.3 (2016-07-25)
+
 - If PKG_CONFIG_PATH is already defined, honor it in the msys2 shell.
 
 ## v1.2.2 (2016-06-24)
+
 - Download msys2 from the primary download url (instead of a specific mirror).
 
 ## v1.2.1 (2016-06-23)
+
 - Fix msys2 initial install/upgrade steps that dependended on file modification time.
 - Make msys2_package :install idempotent - it should not reinstall packages.
 - Do not allow bash.exe to be called if MSYSTEM is undefined.
