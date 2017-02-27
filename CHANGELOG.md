@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of the mingw cookbook.
 
+## 2.0.0 (2017-02-27)
+
+- Require Chef 12.5 and remove compat_resource dependency
+
 ## 1.2.5 (2017-01-18)
 
 - Require a working compat_resource
