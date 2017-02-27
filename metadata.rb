@@ -9,7 +9,6 @@ version '1.2.5'
 supports 'windows'
 
 depends 'seven_zip'
-depends 'compat_resource', '>= 12.16.3'
 
 source_url 'https://github.com/chef-cookbooks/mingw'
 issues_url 'https://github.com/chef-cookbooks/mingw/issues'
