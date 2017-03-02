@@ -12,3 +12,4 @@ depends 'seven_zip'
 
 source_url 'https://github.com/chef-cookbooks/mingw'
 issues_url 'https://github.com/chef-cookbooks/mingw/issues'
+chef_version '>= 12.5' if respond_to?(:chef_version)
