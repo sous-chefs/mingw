@@ -15,3 +15,4 @@ rem which uses this environment variable to change directories.
 set CHERE_INVOKING=1
 
 %~dp0..\usr\bin\bash.exe -l %*
+rem >> %~dp0logoutput.txt
