@@ -35,4 +35,4 @@ module Mingw
   end
 end
 
-Chef::Resource.send(:include, Mingw::Helper)
+Chef::Resource.include Mingw::Helper
