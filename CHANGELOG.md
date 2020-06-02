@@ -2,11 +2,14 @@
 
 This file is used to list changes made in each version of the mingw cookbook.
 
-## Unreleased
+## 2.1.1 (2020-06-02)
 
-- resolved cookstyle error: resources/get.rb:26:1 warning: `ChefDeprecations/ResourceUsesOnlyResourceName`
-- resolved cookstyle error: resources/msys2_package.rb:31:1 warning: `ChefDeprecations/ResourceUsesOnlyResourceName`
-- resolved cookstyle error: resources/tdm_gcc.rb:26:1 warning: `ChefDeprecations/ResourceUsesOnlyResourceName`
+- Resolve cookstyle 5.8 warnings - [@tas50](https://github.com/tas50)
+- Require Chef 12.15+ - [@tas50](https://github.com/tas50)
+- Fix compatibility with Chef Infra Client 16 - [@xorimabot](https://github.com/xorimabot)
+  - resolved cookstyle error: resources/get.rb:26:1 warning: `ChefDeprecations/ResourceUsesOnlyResourceName`
+  - resolved cookstyle error: resources/msys2_package.rb:31:1 warning: `ChefDeprecations/ResourceUsesOnlyResourceName`
+  - resolved cookstyle error: resources/tdm_gcc.rb:26:1 warning: `ChefDeprecations/ResourceUsesOnlyResourceName`
 
 ## 2.1.0 (2018-07-24)
 
