@@ -28,7 +28,7 @@
 property :package, String, name_property: true
 property :root, String, required: true
 
-resource_name :msys2_package
+provides :msys2_package
 
 action_class do
   #
