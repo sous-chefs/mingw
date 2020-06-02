@@ -2,6 +2,12 @@
 
 This file is used to list changes made in each version of the mingw cookbook.
 
+## Unreleased
+
+- resolved cookstyle error: resources/get.rb:26:1 warning: `ChefDeprecations/ResourceUsesOnlyResourceName`
+- resolved cookstyle error: resources/msys2_package.rb:31:1 warning: `ChefDeprecations/ResourceUsesOnlyResourceName`
+- resolved cookstyle error: resources/tdm_gcc.rb:26:1 warning: `ChefDeprecations/ResourceUsesOnlyResourceName`
+
 ## 2.1.0 (2018-07-24)
 
 - refactor msys2 package source and checksum to attributes

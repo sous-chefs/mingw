@@ -23,8 +23,6 @@
 property :package, String, name_property: true
 property :root, String, required: true
 
-resource_name :mingw_get
-
 action_class do
   def mingw_do_action(action_cmd)
     seven_zip_archive "fetching mingw-get to #{win_friendly_path(root)}" do
