@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of the mingw cookbook.
 
+## Unreleased
+
+- Standardise files with files in sous-chefs/repo-management
+
 ## 2.1.1 (2020-06-02)
 
 - Resolve cookstyle 5.8 warnings - [@tas50](https://github.com/tas50)
