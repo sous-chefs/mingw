@@ -4,6 +4,8 @@ This file is used to list changes made in each version of the mingw cookbook.
 
 ## Unreleased
 
+- Enabled unified mode
+
 ## 2.1.3 - *2021-08-31*
 
 - Standardise files with files in sous-chefs/repo-management
