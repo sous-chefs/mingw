@@ -17,6 +17,9 @@
 # limitations under the License.
 #
 
+# enable unified mode
+unified_mode true
+
 # Installs a gcc based C/C++ compiler and runtime from TDM GCC.
 
 property :flavor, Symbol, is: [:sjlj_32, :seh_sjlj_64], default: :seh_sjlj_64

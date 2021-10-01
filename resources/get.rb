@@ -17,6 +17,9 @@
 # limitations under the License.
 #
 
+# enable unified mode
+unified_mode true
+
 # Installs the core msys utilities needed for mingw/git/any other posix
 # based toolchain at a desired location using mingw-get.exe.
 
