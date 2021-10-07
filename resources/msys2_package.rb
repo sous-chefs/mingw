@@ -24,6 +24,7 @@
 # You never get anything but the latest version. And if that's broken...
 # well that's your problem isn't it? And they don't believe in preserving
 # older versions. Good luck!
+unified_mode true
 
 property :package, String, name_property: true
 property :root, String, required: true
