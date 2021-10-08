@@ -4,6 +4,9 @@ This file is used to list changes made in each version of the mingw cookbook.
 
 ## Unreleased
 
+- Changes to upgrade chef client support from version: 12.15+ to version: 15.3+
+  - Added flag unified_mode with value: true
+
 ## 2.1.3 - *2021-08-31*
 
 - Standardise files with files in sous-chefs/repo-management
