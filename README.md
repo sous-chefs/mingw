@@ -12,7 +12,7 @@ Installs a mingw/msys based compiler tools chain on windows. This is required fo
 
 ### Chef
 
-- Chef 12.15+
+- Chef 15.3+
 
 ### Cookbooks
 
