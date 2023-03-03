@@ -63,9 +63,11 @@ This file is used to list changes made in each version of the mingw cookbook.
 - Do not allow bash.exe to be called if MSYSTEM is undefined.
 
 ## v1.2.0 (2016-06-03)
+
 - Updating to fix the issue where msys2 bash does not inherit the cwd correctly
 
 ## v1.1.0 (2016-06-03)
+
 - Add msys2 based compiler support using the new msys2_package resource
 
 ## v1.0.0 (2016-05-11)
