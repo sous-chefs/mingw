@@ -3,7 +3,7 @@ maintainer 'Chef Software, Inc.'
 maintainer_email 'cookbooks@chef.io'
 license 'Apache-2.0'
 description 'Installs a mingw/msys based toolchain on windows'
-version '2.1.4'
+version '2.1.5'
 
 supports 'windows'
 
