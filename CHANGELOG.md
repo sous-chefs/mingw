@@ -2,7 +2,7 @@
 
 This file is used to list changes made in each version of the mingw cookbook.
 
-## Unreleased
+## 2.1.7 - *2023-06-01*
 
 ## 2.1.6 - *2023-04-01*
 
