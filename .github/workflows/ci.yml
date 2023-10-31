@@ -8,10 +8,42 @@ name: ci
 
 jobs:
   lint-unit:
-    uses: sous-chefs/.github/.github/workflows/lint-unit.yml@2.0.6
+    uses: sous-chefs/.github/.github/workflows/lint-unit.yml@3.0.0
     permissions:
       actions: write
       checks: write
       pull-requests: write
       statuses: write
       issues: write
+
+  integration:
+    needs: lint-unit
+    runs-on: windows-2019
+    strategy:
+      matrix:
+        os:
+          - "windows-2019"
+        suite:
+          - "tools32"
+          - "tools64"
+          - "msys2-tools64"
+      fail-fast: false
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Install Chef
+        uses: actionshub/chef-install@main
+      - name: test-kitchen
+        uses: actionshub/test-kitchen@main
+        env:
+          CHEF_LICENSE: accept-no-persist
+          KITCHEN_LOCAL_YAML: kitchen.exec.yml
+        with:
+          suite: ${{ matrix.suite }}
+          os: ${{ matrix.os }}
+
+  final:
+    runs-on: ubuntu-latest
+    needs: [integration]
+    steps:
+      - run: echo ${{needs.integration.outputs}}
