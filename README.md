@@ -1,7 +1,5 @@
 # mingw Cookbook
 
-[![Cookbook Version](http://img.shields.io/cookbook/v/mingw.svg)][cookbook] [![Build Status](http://img.shields.io/travis/chef-cookbooks/mingw.svg?branch=master)][travis]
-
 Installs a mingw/msys based compiler tools chain on windows. This is required for compiling C software from source.
 
 ## Requirements
@@ -63,6 +61,3 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ```
-
-[cookbook]: https://supermarket.chef.io/cookbooks/mingw
-[travis]: http://travis-ci.org/chef-cookbooks/mingw
