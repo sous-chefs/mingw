@@ -18,6 +18,7 @@
 #
 
 # Installs a gcc based C/C++ compiler and runtime from TDM GCC.
+unified_mode true
 
 property :flavor, Symbol, is: [:sjlj_32, :seh_sjlj_64], default: :seh_sjlj_64
 property :root, String, required: true

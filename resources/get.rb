@@ -19,6 +19,7 @@
 
 # Installs the core msys utilities needed for mingw/git/any other posix
 # based toolchain at a desired location using mingw-get.exe.
+unified_mode true
 
 property :package, String, name_property: true
 property :root, String, required: true
