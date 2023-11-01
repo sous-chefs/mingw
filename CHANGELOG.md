@@ -7,6 +7,29 @@ This file is used to list changes made in each version of the mingw cookbook.
 - Updated minimum Chef infra-client version supported, dropping `< 15.3`
   - Added flag unified_mode with value: true
 
+## 3.0.1 - *2023-10-31*
+
+- Fix metadata
+
+## 3.0.0 - *2023-10-31*
+
+- Adopt cookbook.
+  - This is still in a broken state given we haven't updated the cookbook to use the new seven_zip cookbook.
+
+## 2.1.9 - *2023-10-03*
+
+## 2.1.8 - *2023-07-10*
+
+## 2.1.7 - *2023-06-01*
+
+## 2.1.6 - *2023-04-01*
+
+## 2.1.5 - *2023-03-03*
+
+## 2.1.4 - *2022-02-08*
+
+- Remove delivery folder
+
 ## 2.1.3 - *2021-08-31*
 
 - Standardise files with files in sous-chefs/repo-management
@@ -62,9 +85,11 @@ This file is used to list changes made in each version of the mingw cookbook.
 - Do not allow bash.exe to be called if MSYSTEM is undefined.
 
 ## v1.2.0 (2016-06-03)
+
 - Updating to fix the issue where msys2 bash does not inherit the cwd correctly
 
 ## v1.1.0 (2016-06-03)
+
 - Add msys2 based compiler support using the new msys2_package resource
 
 ## v1.0.0 (2016-05-11)
