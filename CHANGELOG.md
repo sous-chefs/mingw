@@ -2,7 +2,7 @@
 
 This file is used to list changes made in each version of the mingw cookbook.
 
-## Unreleased
+## 4.0.0 - *2023-11-01*
 
 - Updated minimum Chef infra-client version supported, dropping `< 15.3`
   - Added flag unified_mode with value: true
