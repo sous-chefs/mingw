@@ -28,6 +28,8 @@ This file is used to list changes made in each version of the mingw cookbook.
 
 ## 2.1.5 - *2023-03-03*
 
+- resolved cookstyle error: resources/msys2_package.rb:1:1 refactor: `Chef/Deprecations/ResourceWithoutUnifiedTrue`
+
 ## 2.1.4 - *2022-02-08*
 
 - Remove delivery folder
