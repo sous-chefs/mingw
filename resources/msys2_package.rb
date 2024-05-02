@@ -17,6 +17,9 @@
 # limitations under the License.
 #
 
+# enable unified mode
+unified_mode true
+
 # Installs msys2 base system and installs/upgrades packages within in.
 #
 # Where's the version flag? Where's idempotence you say? Well f*** you
