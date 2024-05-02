@@ -4,6 +4,8 @@ This file is used to list changes made in each version of the mingw cookbook.
 
 ## Unreleased
 
+- resolved cookstyle error: resources/msys2_package.rb:1:1 refactor: `Chef/Deprecations/ResourceWithoutUnifiedTrue`
+
 ## 4.0.3 - *2024-05-02*
 
 ## 4.0.2 - *2024-05-02*
