@@ -18,7 +18,7 @@ jobs:
 
   integration:
     needs: lint-unit
-    runs-on: windows-2022
+    runs-on: windows-2025
     strategy:
       matrix:
         os:
@@ -30,7 +30,7 @@ jobs:
       fail-fast: false
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Install Chef
         uses: actionshub/chef-install@main
       - name: test-kitchen
