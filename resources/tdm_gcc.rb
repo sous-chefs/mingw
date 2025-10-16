@@ -17,6 +17,9 @@
 # limitations under the License.
 #
 
+# enable unified mode
+unified_mode true
+
 # Installs a gcc based C/C++ compiler and runtime from TDM GCC.
 unified_mode true
 
