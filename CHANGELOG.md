@@ -2,6 +2,13 @@
 
 This file is used to list changes made in each version of the mingw cookbook.
 
+## [4.0.6](https://github.com/sous-chefs/mingw/compare/v4.0.5...v4.0.6) (2025-10-16)
+
+
+### Bug Fixes
+
+* **ci:** Update workflows to use release pipeline ([#58](https://github.com/sous-chefs/mingw/issues/58)) ([d598c33](https://github.com/sous-chefs/mingw/commit/d598c330ba64caed430978373223fd8d9b9a4e27))
+
 ## [4.0.5](https://github.com/sous-chefs/mingw/compare/4.0.4...v4.0.5) (2025-10-15)
 
 
