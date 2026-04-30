@@ -1,52 +1,58 @@
 # mingw Cookbook
 
-Installs a mingw/msys based compiler tools chain on windows. This is required for compiling C software from source.
+Installs MinGW / MSYS2 / TDM-GCC compiler toolchains on Windows. Use it to bootstrap a C/C++ build environment for software that needs to be compiled from source.
 
 ## Requirements
 
 ### Platforms
 
-- Windows
+- Windows Server 2019, 2022, 2025 (or equivalent client SKUs)
 
 ### Chef
 
-- Chef 15.3+
+- Chef Infra Client 16+
 
 ### Cookbooks
 
-- seven_zip
+None.
+
+## Upgrading from 4.x
+
+The 4.x line shipped a `mingw::default` recipe and `node['msys2']` attributes. Both have been removed in favor of resource properties. See [migration.md](./migration.md) for a step-by-step upgrade guide.
 
 ## Usage
 
-Add this cookbook as a dependency to your cookbook in its `metadata.rb` and include the default recipe in one of your recipes.
+Add the cookbook as a dependency:
 
 ```ruby
 # metadata.rb
 depends 'mingw'
 ```
 
+Then call any of the resources from your own recipes — there is no recipe to include.
+
 ```ruby
 # your recipe.rb
-include_recipe 'mingw::default'
+msys2_package 'base-devel' do
+  root 'C:\msys2'
+end
 ```
 
-Use the `msys2_package` resource in any recipe to fetch msys2 based packages. Use the `mingw_get` resource in any recipe to fetch mingw packages. Use the `mingw_tdm_gcc` resource to fetch a version of the TDM GCC compiler.
+By default, prefer the MSYS2 packages: they are newer and better supported.
 
-By default, you should prefer the msys2 packages as they are newer and better supported. C/C++ compilers on windows use various different exception formats and you need to pick the right one for your task. In the 32-bit world, you have SJLJ (set-jump/long-jump) based exception handling and DWARF-2 (shortened to DW2) based exception handling. SJLJ produces code that can happily throw exceptions across stack frames of code compiled by MSVC. DW2 involves more extensive metadata but produces code that cannot unwind MSVC generated stack-frames - hence you need to ensure that you don't have any code that throws across a "system call". Certain languages and runtimes have specific requirements as to the exception format supported. As an example, if you are building code for Rust, you will probably need a modern gcc from msys2 with DW2 support as that's what the panic/exception formatter in Rust depends on. In a 64-bit world, you may still use SJLJ but compilers all commonly support SEH (structured exception handling).
+C/C++ compilers on Windows use different exception formats and you need to pick the one your build expects. In 32-bit, you have SJLJ (set-jump/long-jump) and DWARF-2 (DW2). SJLJ can throw across MSVC-built stack frames; DW2 cannot. Some toolchains require a specific format — for example, Rust needs a modern gcc from MSYS2 with DW2. In 64-bit you can still use SJLJ but compilers commonly support SEH (structured exception handling) too.
 
-Of course, to further complicate matters, different versions of different compilers support different exception handling. The default compilers that come with mingw_get are 32-bit only compilers and support DW2\. The TDM compilers come in 3 flavors: a 32-bit only version with SJLJ support, a 32-bit only version with DW2 support and a "multilib" compiler which supports only SJLJ in 32-bit mode but can produce 64-bit SEH code. The standard library support varies drastically between these various compiler flavors (even within the same version). In msys2, you can install a mingw-w64 based compilers for either 32-bit DW2 support or 64-bit SEH support. If all this hurts your brain, I can only apologize.
+The compilers shipped via `mingw_get` are 32-bit DW2. TDM-GCC ships in three flavors: 32-bit SJLJ, 32-bit DW2, and a multi-lib that builds 64-bit SEH and 32-bit SJLJ. MSYS2 lets you install mingw-w64 toolchains for either 32-bit DW2 or 64-bit SEH.
 
 ## Resources
 
-- [minw_get](./documentation/mingw_get.md)
+- [mingw_get](./documentation/mingw_get.md)
 - [mingw_tdm_gcc](./documentation/mingw_tdm_gcc.md)
 - [msys2_package](./documentation/msys2_package.md)
 
 ## License & Authors
 
-**Author:** Cookbook Engineering Team ([cookbooks@chef.io](mailto:cookbooks@chef.io))
-
-**Copyright:** 2009-2016, Chef Software, Inc.
+**Author:** Sous Chefs ([help@sous-chefs.org](mailto:help@sous-chefs.org))
 
 ```text
 Licensed under the Apache License, Version 2.0 (the "License");

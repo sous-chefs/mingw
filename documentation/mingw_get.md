@@ -1,19 +1,23 @@
 # mingw_get
 
+Manages legacy MinGW packages from SourceForge using `mingw-get.exe`. Prefer `msys2_package` for new installs; `mingw_get` exists for compatibility with legacy toolchains and is required by `mingw_tdm_gcc` in 32-bit mode.
+
 ## Actions
 
-- `:install` - Installs a mingw package from sourceforge using mingw-get.exe.
-- `:remove` - Uninstalls a mingw package.
-- `:upgrade` - Upgrades a mingw package (even to a lower version).
+- `:install` - Installs the named mingw-get package. Default action.
+- `:remove` - Uninstalls the named mingw-get package.
+- `:upgrade` - Upgrades the named mingw-get package (may downgrade).
 
-## Parameters
+## Properties
 
-- `package` - A mingw-get package (or meta-package) to fetch and install. You may use a legal package wild-card pattern here if you are installing. This is the name attribute.
-- `root` - The root directory where msys and mingw tools will be installed. This directory must not contain any spaces in order to pacify old posix tools and most Makefiles.
+- `package` - A mingw-get package or meta-package. Wildcards are accepted. This is the name attribute.
+- `root` - The directory where MinGW/MSYS will be installed. Must not contain spaces.
+- `source_url` - URL to the `mingw-get` archive. Defaults to the SourceForge mirror that the cookbook ships with.
+- `checksum` - SHA-256 checksum of the `mingw-get` archive.
 
 ## Examples
 
-To get the core msys developer tools in `C:\mingw32`
+Install the core MSYS developer tools at `C:\mingw32`:
 
 ```ruby
 mingw_get 'msys-base=2013072300-msys-bin.meta' do

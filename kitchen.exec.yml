@@ -1,7 +1,46 @@
 ---
-driver: { name: exec }
-transport: { name: exec }
+driver:
+  name: exec
+
+transport:
+  name: exec
+
+provisioner:
+  name: chef_zero
+  chef_omnibus_install: false
+  chef_license: accept
+  enforce_idempotency: true
+  multiple_converge: 2
+  deprecations_as_errors: true
+
+verifier:
+  name: inspec
 
 platforms:
-  - name: macos-latest
-  - name: windows-latest
+  - name: windows-2022
+
+suites:
+  - name: default
+    run_list:
+      - recipe[test::default]
+    verifier:
+      inspec_tests:
+        - test/integration/default
+  - name: tools32
+    run_list:
+      - recipe[test::tools32]
+    verifier:
+      inspec_tests:
+        - test/integration/tools32
+  - name: tools64
+    run_list:
+      - recipe[test::tools64]
+    verifier:
+      inspec_tests:
+        - test/integration/tools64
+  - name: msys2_tools64
+    run_list:
+      - recipe[test::msys2_tools64]
+    verifier:
+      inspec_tests:
+        - test/integration/msys2_tools64

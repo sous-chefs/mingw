@@ -1,8 +1,9 @@
+# frozen_string_literal: true
 #
 # Cookbook:: mingw
 # Resource:: get
 #
-# Copyright:: 2016-2019, Chef Software, Inc.
+# Copyright:: 2016-2026, Sous Chefs
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -10,34 +11,49 @@
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
 
-# Installs the core msys utilities needed for mingw/git/any other posix
-# based toolchain at a desired location using mingw-get.exe.
 unified_mode true
+
+provides :mingw_get
 
 property :package, String, name_property: true
 property :root, String, required: true
+property :source_url, String,
+  default: 'http://iweb.dl.sourceforge.net/project/mingw/Installer/mingw-get/mingw-get-0.6.2-beta-20131004-1/mingw-get-0.6.2-mingw32-beta-20131004-1-bin.zip'
+property :checksum, String,
+  default: '2e0e9688d42adc68c5611759947e064156e169ff871816cae52d33ee0655826d'
 
 action_class do
-  def mingw_do_action(action_cmd)
-    seven_zip_archive "fetching mingw-get to #{win_friendly_path(root)}" do
-      source 'http://iweb.dl.sourceforge.net/project/mingw/Installer/mingw-get/mingw-get-0.6.2-beta-20131004-1/mingw-get-0.6.2-mingw32-beta-20131004-1-bin.zip'
-      path root
-      checksum '2e0e9688d42adc68c5611759947e064156e169ff871816cae52d33ee0655826d'
-      not_if do
-        ::File.exist?(::File.join(root, 'bin/mingw-get.exe'))
-      end
+  include Mingw::Helpers
+
+  def fetch_mingw_get
+    f_cache_dir = win_friendly_path(::File.join(new_resource.root, '.cache'))
+    f_root = win_friendly_path(new_resource.root)
+    archive_path = ::File.join(f_cache_dir, archive_name(new_resource.source_url))
+
+    directory f_cache_dir do
+      recursive true
     end
 
-    execute "performing #{action_cmd} for #{package}" do
-      command ".\\bin\\mingw-get.exe -v #{action_cmd} #{package}"
-      cwd root
+    remote_file "cache mingw-get to #{f_cache_dir}" do
+      path archive_path
+      source new_resource.source_url
+      checksum new_resource.checksum
+    end
+
+    archive_file "extract mingw-get to #{f_root}" do
+      path archive_path
+      destination f_root
+    end
+  end
+
+  def mingw_do_action(action_cmd)
+    fetch_mingw_get
+
+    f_root = win_friendly_path(new_resource.root)
+    execute "performing #{action_cmd} for #{new_resource.package}" do
+      command ".\\bin\\mingw-get.exe -v #{action_cmd} #{new_resource.package}"
+      cwd f_root
     end
   end
 end

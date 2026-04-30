@@ -4,24 +4,49 @@ driver:
 
 provisioner:
   name: chef_zero
+  product_name: chef
+  product_version: <%= ENV['CHEF_VERSION'] || 'latest' %>
+  channel: stable
+  install_strategy: once
+  chef_license: accept
+  enforce_idempotency: <%= ENV['ENFORCE_IDEMPOTENCY'] || true %>
+  multiple_converge: <%= ENV['MULTIPLE_CONVERGE'] || 2 %>
+  deprecations_as_errors: true
+  log_level: <%= ENV['CHEF_LOG_LEVEL'] || 'auto' %>
 
-# Uncomment the following verifier to leverage Inspec instead of Busser (the
-# default verifier)
-# verifier:
-#   name: inspec
+verifier:
+  name: inspec
 
 platforms:
-  - name: windows-2012r2
+  - name: windows-2019
     driver_config:
-      box: tas50/windows_2012r2
+      box: gusztavvargadr/windows-server-2019-standard
+  - name: windows-2022
+    driver_config:
+      box: gusztavvargadr/windows-server-2022-standard
 
 suites:
+  - name: default
+    run_list:
+      - recipe[test::default]
+    verifier:
+      inspec_tests:
+        - test/integration/default
   - name: tools32
     run_list:
-      - recipe[mingw_tdm_install::install32]
+      - recipe[test::tools32]
+    verifier:
+      inspec_tests:
+        - test/integration/tools32
   - name: tools64
     run_list:
-      - recipe[mingw_tdm_install::install64]
+      - recipe[test::tools64]
+    verifier:
+      inspec_tests:
+        - test/integration/tools64
   - name: msys2_tools64
     run_list:
-      - recipe[mingw_msys2_install::default]
+      - recipe[test::msys2_tools64]
+    verifier:
+      inspec_tests:
+        - test/integration/msys2_tools64
