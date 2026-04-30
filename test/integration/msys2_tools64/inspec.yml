@@ -1,0 +1,7 @@
+---
+name: msys2_tools64
+title: MSYS2 64-bit toolchain tests
+maintainer: Sous Chefs
+license: Apache-2.0
+summary: Verifies a 64-bit MSYS2 MinGW toolchain
+version: 1.0.0

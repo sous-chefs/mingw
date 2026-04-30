@@ -1,22 +1,43 @@
 # mingw_tdm_gcc
 
+Installs a TDM-GCC compiler toolchain on Windows. Provides a compiler only — pair with `mingw_get` (or `msys2_package`) for support tools (`make`, `grep`, `awk`, `bash`, etc.).
+
 ## Actions
 
-- `:install` - Installs the TDM compiler toolchain at the given path. This only gives you a compiler. If you need any support tooling such as make/grep/awk/bash etc., see `mingw_get`.
+- `:install` - Downloads and extracts the TDM-GCC archives at `root`. Default action.
+- `:remove` - Recursively deletes the install root.
 
-## Parameters
+## Properties
 
-- `flavor` - Either `:sjlj_32` or `:seh_sjlj_64`. TDM-64 is a 32/64-bit multi-lib "cross-compiler" toolchain that builds 64-bit by default. It uses structured exception handling (SEH) in 64-bit code and setjump-longjump exception handling (SJLJ) in 32-bit code. TDM-32 only builds 32-bit binaries and uses SJLJ.
-- `root` - The root directory where compiler tools and runtime will be installed. This directory must not contain any spaces in order to pacify old posix tools and most Makefiles.
-- `version` - The version of the compiler to fetch and install. This is the name attribute. Currently, '5.1.0' is supported.
+- `flavor` - Either `:sjlj_32` or `:seh_sjlj_64`. The 64-bit flavor is a multi-lib cross-compiler that defaults to 64-bit output and uses SEH for 64-bit code; SJLJ for any 32-bit code it produces. The 32-bit flavor only builds 32-bit binaries and uses SJLJ.
+- `root` - The install root. Must not contain spaces.
+- `version` - The TDM-GCC version. Currently only `'5.1.0'` is supported. This is the name attribute.
 
 ## Examples
 
-To get the 32-bit TDM GCC compiler in `C:\mingw32`
+Install the 32-bit TDM-GCC compiler at `C:\mingw32`:
 
 ```ruby
 mingw_tdm_gcc '5.1.0' do
   flavor :sjlj_32
   root 'C:\mingw32'
+end
+```
+
+Install the 64-bit TDM-GCC compiler at `C:\mingw64`:
+
+```ruby
+mingw_tdm_gcc '5.1.0' do
+  flavor :seh_sjlj_64
+  root 'C:\mingw64'
+end
+```
+
+Remove a TDM-GCC install (deletes the entire `root` tree):
+
+```ruby
+mingw_tdm_gcc '5.1.0' do
+  root 'C:\mingw64'
+  action :remove
 end
 ```
