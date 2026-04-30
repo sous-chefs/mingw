@@ -4,8 +4,8 @@ driver:
 
 provisioner:
   name: chef_zero
-  product_name: chef
-  product_version: <%= ENV['CHEF_VERSION'] || 'latest' %>
+  product_name: cinc
+  product_version: <%= ENV['CINC_VERSION'] || 'latest' %>
   channel: stable
   install_strategy: once
   chef_license: accept
