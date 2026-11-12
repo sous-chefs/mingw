@@ -40,3 +40,11 @@ suites:
     verifier:
       inspec_tests:
         - test/integration/msys2
+  - name: upgrade
+    provisioner:
+      named_run_list: upgrade
+      multiple_converge: 1
+      enforce_idempotency: false
+    verifier:
+      inspec_tests:
+        - test/integration/upgrade

@@ -32,7 +32,8 @@ describe Mingw::Helper do
   end
 
   it 'rejects canonical drive roots and relative paths before any install or removal' do
-    ['C:/', 'C:/tools/..', 'C:\\tools\\..', '.', '../tools', '//server/share'].each do |path|
+    ['C:/', 'C:/tools/..', 'C:\\tools\\..', '.', '../tools', '//server/share', 'C:/ ', 'C:/foo/.. ', '//server/share/. ',
+     '//?/GLOBALROOT/Device/HarddiskVolume1', '//./C:/tools', 'C:/NUL', 'C:/foo:bar'].each do |path|
       expect(described_class.valid_install_root?(path)).to be false
     end
     ['C:/tools', 'C:\\tools', '//server/share/tools'].each do |path|

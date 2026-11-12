@@ -62,6 +62,28 @@ describe 'msys2_package' do
     expect(chef_run).to create_template('C:/msys2/bin/bash.bat')
     expect(chef_run).to create_template('C:/msys2/etc/profile.d/custom_prefix.sh')
   end
+  it 'preserves the shim home and minimal Windows path environment' do
+    chef_run.find_resources(:execute).each do |resource|
+      expect(resource.environment).to include('MSYS2_PATH_TYPE' => 'minimal', 'HOME' => "/home/#{ENV['USERNAME'] || ENV['USER']}")
+    end
+  end
+  context 'upgrade of an existing root' do
+    before do
+      allow(File).to receive(:exist?).and_call_original
+      allow(File).to receive(:exist?).with('C:/msys2/usr/bin/pacman.exe').and_return(true)
+    end
+    recipe do
+      msys2_package 'make' do
+        root 'C:/msys2'
+        action :upgrade
+      end
+    end
+    it 'uses two fresh login shells for a complete core and system upgrade' do
+      commands = chef_run.find_resources(:execute).map(&:command)
+      expect(commands.size).to eq(2)
+      expect(commands).to all(include('--login -c', 'pacman -Syu'))
+    end
+  end
   context 'custom source' do
     recipe do
       msys2_package 'make' do

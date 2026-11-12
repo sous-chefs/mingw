@@ -27,6 +27,7 @@ file "#{root_path}/hello.cpp" do
   content "int main() { try { throw 42; } catch (int value) { return value == 42 ? 0 : 1; } }\n"
 end
 execute 'compile TDM C++ exception test' do
-  command "\"#{root_path}/bin/g++.exe\" \"#{root_path}/hello.cpp\" -o \"#{root_path}/bin/hello.exe\""
+  command "\"#{root_path}/bin/g++.exe\" -v \"#{root_path}/hello.cpp\" -o \"#{root_path}/bin/hello.exe\""
+  environment('PATH' => "#{root_path}/bin;#{root_path}/msys/1.0/bin;#{ENV['PATH']}")
   creates "#{root_path}/bin/hello.exe"
 end

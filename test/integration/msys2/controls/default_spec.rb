@@ -11,3 +11,10 @@ end
 describe command('C:/mingw-test-msys2/hello.exe') do
   its('exit_status') { should eq 0 }
 end
+
+describe command('C:/mingw-test-msys2/usr/bin/bash.exe -lc "pacman -Q db gdbm nano"') do
+  its('exit_status') { should eq 0 }
+end
+describe command('C:/mingw-test-msys2/usr/bin/bash.exe -lc "pacman -Q emacs"') do
+  its('exit_status') { should eq 1 }
+end

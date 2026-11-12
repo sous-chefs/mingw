@@ -11,7 +11,8 @@ PREMSYS2_PKG_CONFIG_PATH integration remain. Initial core updates restart the
 login shell between passes, following the vendor update model.
 
 `:install` skips installed packages or complete groups. `:upgrade` explicitly
-requests a full rolling system update and package installation. `:remove` removes
-the named package while preserving the shared MSYS2 installation. No missing
+requests a full rolling system update and package installation using two fresh
+login shells, including for an existing installation. `:remove` removes
+the named package, or the currently installed members of a package group, while preserving the shared MSYS2 installation. No missing
 installation is bootstrapped during removal. Custom archives must retain the
 standard msys64 top-level directory structure.

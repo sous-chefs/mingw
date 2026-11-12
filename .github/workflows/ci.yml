@@ -26,7 +26,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        suite: [default, tools32, tools64, msys2]
+        suite: [default, tools32, tools64, msys2, upgrade]
     steps:
       - uses: actions/checkout@v7
       - name: Install Cinc Workstation
@@ -37,6 +37,8 @@ jobs:
           . $installer
           install -project cinc-workstation -version latest
           "$env:SystemDrive\cinc-project\cinc-workstation\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Validate Windows path guards without filesystem mutation
+        run: chef exec rspec spec/helpers_spec.rb spec/msys2_helper_spec.rb
       - name: Install Policyfile
         run: chef install Policyfile.rb
       - name: Test native Windows toolchain
@@ -53,4 +55,4 @@ jobs:
         run: |
           chef exec kitchen converge ${{ matrix.suite }}-windows-2025
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          chef exec kitchen verify ${{ matrix.suite }}-windows-2025
+          chef exec kitchen verify ${{ matrix.suite }}-windows-2025 --test-base-path test

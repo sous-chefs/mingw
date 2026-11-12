@@ -11,24 +11,9 @@ property :checksum, String, default: '8a2095647afbf799d113d0cae35f7544589d059819
 action_class do
   include Mingw::Helper
 
-  def bash_command(command)
-    "\"#{::File.join(new_resource.root, 'usr/bin/bash.exe')}\" --login -c \"#{command}\""
-  end
+  include Mingw::MSYS2Helper
 
-  def package_installed?
-    return false unless ::File.exist?(::File.join(new_resource.root, 'usr/bin/pacman.exe'))
-
-    options = { environment: { 'MSYSTEM' => 'MSYS', 'CHERE_INVOKING' => '1' } }
-    return true if shell_out(bash_command("pacman -Q -- #{new_resource.package}"), **options).exitstatus.zero?
-
-    group = shell_out(bash_command("pacman -Sgq -- #{new_resource.package}"), **options)
-    members = group.stdout.split
-    return false unless group.exitstatus.zero? && !members.empty?
-
-    shell_out(bash_command("pacman -Q -- #{members.join(' ')}"), **options).exitstatus.zero?
-  end
-
-  def bootstrap
+  def bootstrap(update: true)
     fresh = !::File.exist?(::File.join(new_resource.root, 'usr/bin/pacman.exe'))
     directory new_resource.root do
       recursive true
@@ -54,24 +39,29 @@ action_class do
       end
     end
 
-    if fresh
+    if fresh && update
       # Restart the login shell between core updates, as required by MSYS2.
       2.times do |pass|
         execute "initial MSYS2 update #{pass + 1} in #{new_resource.root}" do
           command bash_command('pacman -Syu --noconfirm')
-          environment('MSYSTEM' => 'MSYS', 'CHERE_INVOKING' => '1')
+          environment msys_environment
+          live_stream true
         end
       end
     end
   end
 
-  def package_action(verb)
+  def package_action(verb, pass = nil)
     provider = self
-    execute "MSYS2 #{verb} #{new_resource.package} in #{new_resource.root}" do
-      command bash_command("pacman #{verb} --noconfirm -- #{new_resource.package}")
-      environment('MSYSTEM' => 'MSYS', 'CHERE_INVOKING' => '1')
+    targets = verb == '-R' ? installed_targets : [new_resource.package]
+    return if targets.empty?
+
+    suffix = pass ? " (pass #{pass})" : ''
+    execute "MSYS2 #{verb} #{new_resource.package} in #{new_resource.root}#{suffix}" do
+      command bash_command("pacman #{verb} --noconfirm -- #{targets.join(' ')}")
+      environment msys_environment
+      live_stream true
       not_if { provider.package_installed? } if verb == '-S --needed'
-      only_if { provider.package_installed? } if verb == '-R'
     end
   end
 end
@@ -82,8 +72,8 @@ action :install do
 end
 
 action :upgrade do
-  bootstrap
-  package_action('-Syu')
+  bootstrap(update: false)
+  2.times { |pass| package_action('-Syu', pass + 1) }
 end
 
 # Other package resources may share this MSYS2 installation.

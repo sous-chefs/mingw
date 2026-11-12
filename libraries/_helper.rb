@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'uri'
-require 'pathname'
 
 #
 # Cookbook:: mingw
@@ -25,9 +24,22 @@ require 'pathname'
 module Mingw
   module Helper
     def self.valid_install_root?(path)
-      normal = Pathname.new(path.tr('\\', '/')).cleanpath.to_s
-      normal.match?(%r{\A[A-Za-z]:/.+}) ||
-        (path.start_with?('\\\\', '//') && normal.split('/').reject(&:empty?).size > 2)
+      normal = path.tr('\\', '/')
+      return false if normal.start_with?('//?/', '//./')
+
+      if normal.match?(%r{\A[A-Za-z]:/})
+        parts = normal[3..].split('/')
+        return false if parts.empty?
+      elsif normal.start_with?('//') && !normal.start_with?('///')
+        parts = normal.delete_prefix('//').split('/')
+        return false if parts.size < 3
+      else
+        return false
+      end
+      parts.all? do |part|
+        !part.empty? && !part.match?(/[. ]\z|[<>:"|?*\x00-\x1f]/) &&
+          !part.match?(/\A(?:CON|PRN|AUX|NUL|COM[1-9¹²³]|LPT[1-9¹²³]|CONIN\$|CONOUT\$)(?:\.|\z)/i)
+      end
     end
 
     def win_friendly_path(path)

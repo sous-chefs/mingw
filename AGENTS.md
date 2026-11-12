@@ -74,3 +74,43 @@ Lifecycle config is standalone via KITCHEN_YAML, because Kitchen deep-merges
 inspec_tests arrays from local overrides; TDM removal must not inherit assertions
 that the removed compiler exists. Root validation canonicalises dot segments
 before rejecting drive roots or UNC shares; absolute subdirectories are required.
+
+
+## Independent review corrections
+
+Review found Windows trailing-dot/space paths and device namespaces bypassed
+POSIX cleanpath checks. Reject those components, DOS device names and device
+namespaces before filesystem mutation. Pure helper regressions also run natively
+on Windows; they do not create or remove any test path.
+
+Preserve the old batch shim environment in direct bash calls: HOME uses the Ruby
+expanded Windows username; MSYS2_PATH_TYPE=minimal, CHERE_INVOKING=1, MSYSTEM=MSYS.
+Existing-root upgrades use two fresh login shells, per
+[MSYS2 update guidance](https://www.msys2.org/docs/updating/). Install completeness
+queries remote group membership; removal independently queries locally installed
+members, so partial groups are removable without installing missing members.
+Native coverage uses the real Database group and partial editors group (nano
+present, emacs absent), then removes installed editors while retaining MSYS2.
+
+Second run43229491781 proved TDM64 C++ compilation/execution (7 assertions) and
+second0/28, plus actual removal and second0/2. Its verify failed because
+kitchen-inspec always adds test/integration/SUITE to explicit profiles. YAML
+verifier test_base_path is ignored by Kitchen. Source and local diagnose confirm
+CLI --test-base-path test selects only explicit lifecycle profiles. TDM32 compile
+failed exit1 with empty output; restore the original test PATH (toolchain bin plus
+MSYS bin) for compiler child programs, and include -v diagnostics. No compiler
+version, runtime archive or flavour is changed.
+
+The added upgrade suite seeds an existing pinned archive then calls :upgrade;
+its action deliberately refreshes the system, so that new suite runs once and
+asserts no outstanding updates. All four install suites and two remove phases
+continue to enforce two converges and a zero-change second converge.
+
+Pacman upstream src/pacman/query.c returns1 when no package matches -Qu.
+The upgrade profile expects exit1 with empty stdout/stderr, distinguishing no
+updates from a query error. Local SDK inspection confirms the lifecycle CLI
+--test-base-path override; YAML alone cannot override this setting.
+
+Reviewed follow-up local verification:16 ChefSpec examples pass and Cookstyle29
+files clean. Actual Kitchen loader with CLI test_base_path=test reports zero
+implicit lifecycle profiles and exactly the requested removal profile per suite.

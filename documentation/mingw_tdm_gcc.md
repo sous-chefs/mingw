@@ -10,3 +10,8 @@ pthread/time header patches. Original compiler archive checksums are unchanged.
 `:install` records completion only after all components succeed and then skips
 archive extraction on subsequent converges. `:remove` removes the dedicated root
 only if its completed installation marker exists. Unmarked roots are retained.
+
+Use the same version and flavour when removing an installation. A completion
+marker for another flavour is not treated as ownership of the requested one.
+Roots must be absolute dedicated Windows directories. Device namespaces, DOS
+device names, dot segments and trailing-dot/space path components are rejected.
