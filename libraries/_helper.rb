@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'uri'
+require 'pathname'
 
 #
 # Cookbook:: mingw
@@ -23,6 +24,12 @@ require 'uri'
 
 module Mingw
   module Helper
+    def self.valid_install_root?(path)
+      normal = Pathname.new(path.tr('\\', '/')).cleanpath.to_s
+      normal.match?(%r{\A[A-Za-z]:/.+}) ||
+        (path.start_with?('\\\\', '//') && normal.split('/').reject(&:empty?).size > 2)
+    end
+
     def win_friendly_path(path)
       path.gsub(::File::SEPARATOR, ::File::ALT_SEPARATOR || '\\') if path
     end
@@ -49,7 +56,18 @@ module Mingw
 
       package_name, constraint = new_resource.package.split('=', 2)
       result = shell_out("\"#{::File.join(new_resource.root, 'bin/mingw-get.exe')}\" show #{package_name}")
-      result.exitstatus.zero? && mingw_installed_output?(result.stdout, constraint)
+      return false unless result.exitstatus.zero?
+      return mingw_installed_output?(result.stdout, constraint) if result.stdout.match?(/^Installed Version:/)
+
+      # Whole-package queries enumerate components but omit installation state.
+      # Query each component, including virtual .meta packages such as msys-base.
+      components = result.stdout[/^Components:\s*([^\r\n]+)/, 1].to_s.split(',').map(&:strip)
+      !components.empty? && components.all? do |component|
+        next false unless component.match?(/\A[\w.+-]+\z/)
+
+        state = shell_out("\"#{::File.join(new_resource.root, 'bin/mingw-get.exe')}\" show #{package_name}-#{component}")
+        state.exitstatus.zero? && mingw_installed_output?(state.stdout, constraint)
+      end
     end
   end
 end

@@ -1,4 +1,4 @@
 # frozen_string_literal: true
 
 property :root, String, required: true,
-                        callbacks: { 'must be a dedicated directory, not a filesystem root' => ->(path) { !path.empty? && path !~ %r{\A(?:[A-Za-z]:[\\/]?|[\\/]+)\z} } }
+                        callbacks: { 'must be an absolute dedicated Windows directory, not a filesystem root' => ->(path) { Mingw::Helper.valid_install_root?(path) } }

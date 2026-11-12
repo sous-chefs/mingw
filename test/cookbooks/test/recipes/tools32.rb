@@ -22,3 +22,11 @@ mingw_tdm_gcc 'TDM GCC - 32 bit' do
   flavor :sjlj_32
   root root_path
 end
+
+file "#{root_path}/hello.cpp" do
+  content "int main() { try { throw 42; } catch (int value) { return value == 42 ? 0 : 1; } }\n"
+end
+execute 'compile TDM C++ exception test' do
+  command "\"#{root_path}/bin/g++.exe\" \"#{root_path}/hello.cpp\" -o \"#{root_path}/bin/hello.exe\""
+  creates "#{root_path}/bin/hello.exe"
+end

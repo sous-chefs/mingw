@@ -1,4 +1,20 @@
 ---
+driver:
+  name: exec
+transport:
+  name: exec
+provisioner:
+  name: chef_infra
+  product_name: cinc
+  product_version: latest
+  chef_license: accept-no-persist
+  multiple_converge: 2
+  enforce_idempotency: true
+  deprecations_as_errors: true
+verifier:
+  name: inspec
+platforms:
+  - name: windows-2025
 suites:
   - name: tools64
     provisioner:

@@ -59,3 +59,18 @@ default/tools32/tools64/msys2 on windows-2025. Root recipes and attributes are
 absent; three resources use explicit provides/unified_mode/frozen headers.
 Native Windows install, second converge and removal remain unverified until
 the scoped branch-push CI run completes. No PR before that evidence.
+
+
+## First native branch run
+
+CI43227324920: default5 assertions, second0/14. MSYS2 group suite5 assertions,
+second0/26; package-removal phase7 assertions, second0/2. Both TDM suites
+extracted native tar.lzma and installed components but failed second-converge
+idempotence on aggregate msys-base. Upstream pkgshow.cpp deliberately omits
+Installed Version for whole packages and emits Components instead. Guards now
+query every explicit component, with a virtual-package regression case.
+
+Lifecycle config is standalone via KITCHEN_YAML, because Kitchen deep-merges
+inspec_tests arrays from local overrides; TDM removal must not inherit assertions
+that the removed compiler exists. Root validation canonicalises dot segments
+before rejecting drive roots or UNC shares; absolute subdirectories are required.

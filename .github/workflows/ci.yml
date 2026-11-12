@@ -48,7 +48,8 @@ jobs:
         if: matrix.suite == 'tools64' || matrix.suite == 'msys2'
         env:
           CHEF_LICENSE: accept-no-persist
-          KITCHEN_LOCAL_YAML: kitchen.lifecycle.yml
+          KITCHEN_YAML: kitchen.lifecycle.yml
+          KITCHEN_LOCAL_YAML: kitchen.exec.yml
         run: |
           chef exec kitchen converge ${{ matrix.suite }}-windows-2025
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
