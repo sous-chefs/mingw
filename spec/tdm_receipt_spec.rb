@@ -26,7 +26,8 @@ describe Mingw::TDMReceipt do
       POWERSHELL
       runner.call(Mingw::TDMReceipt.powershell, '-NoProfile', '-NonInteractive', '-EncodedCommand',
                   Base64.strict_encode64(script.encode('UTF-16LE')),
-                  environment: { 'CHEF_MINGW_TEST_ACL' => path })
+                  environment: { 'CHEF_MINGW_TEST_ACL' => path,
+                                 'PSModulePath' => File.join(ENV.fetch('SystemRoot', 'C:/Windows'), 'System32/WindowsPowerShell/v1.0/Modules') })
     end
 
     it 'rejects an existing writable receipt instead of securing and trusting its contents' do

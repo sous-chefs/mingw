@@ -97,3 +97,9 @@ checkout/execution or shell text interpolation. Caller uses pull_request_target
 opened/reopened/synchronize and job-scoped PRwrite. This bootstraps on default
 branch after feature merge. Require a real target-event guard run on the generated
 major release before publication. Trusted-actor legacy fast paths are not proof.
+
+Native addf1d0 run43247629281 reached13 helper examples. Production protected
+state creation and original receipt ACL audit passed. The two refusal tests
+failed only in their setup mutation helper: inherited pwsh7 PSModulePath could
+not load its Security module in Windows PowerShell5.1. Test subprocess now uses
+the same system-only module path as production. No trust checks were relaxed.
