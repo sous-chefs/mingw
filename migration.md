@@ -26,7 +26,10 @@ mingw_tdm_gcc '5.1.0' do
 end
 ```
 
-Package `:remove` removes the requested package and retains its shared bootstrap
-installation and other packages. TDM `:remove` removes its dedicated root only
-when it has a completed installation marker created by this cookbook. Unmarked
-roots are preserved. Do not share a TDM root with unrelated files or toolchains.
+Package `:remove` removes the requested package (or installed group members) and
+retains shared bootstrap installations. TDM `:remove` uses a per-created-file
+ownership manifest: pre-existing paths, modified files, shared packages and files
+added later are retained. Only unchanged owned files and empty owned directories
+are removed. Whole-root recursive deletion is never used. Redirected paths and
+unrecognised ownership fail safely. Older installations are not silently adopted
+for deletion. See [TDM resource documentation](documentation/mingw_tdm_gcc.md).

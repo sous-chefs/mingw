@@ -28,6 +28,7 @@ file "#{root_path}/hello.cpp" do
 end
 execute 'compile TDM C++ exception test' do
   command "\"#{root_path}/bin/g++.exe\" -v \"#{root_path}/hello.cpp\" -o \"#{root_path}/bin/hello.exe\""
-  environment('PATH' => "#{root_path}/bin;#{root_path}/msys/1.0/bin;#{ENV['PATH']}")
+  cwd "#{root_path}\\bin"
+  environment('PATH' => "#{root_path}\\bin;#{root_path}\\msys\\1.0\\bin;#{ENV['PATH']}")
   creates "#{root_path}/bin/hello.exe"
 end

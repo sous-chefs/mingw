@@ -17,6 +17,10 @@ end
 
 action :install do
   marker = install_marker
+  install_root = new_resource.root
+  existing = Mingw::TDMOwnership.read(install_root, marker)
+  root_created = !::File.exist?(install_root)
+  before = nil
   directory new_resource.root do
     recursive true
   end
@@ -28,18 +32,24 @@ action :install do
     end
   end
 
+  # Dependencies can share this root; they are not TDM-owned artifacts.
+  ruby_block "inventory TDM installation at #{install_root}" do
+    block { before = Mingw::TDMOwnership.inventory(install_root) }
+    only_if { existing.nil? }
+  end
+
   archives = new_resource.flavor == :sjlj_32 ? Mingw::TDM_GCC_32 : Mingw::TDM_GCC_64
   archives.each do |url, hash|
     cache = ::File.join(Chef::Config[:file_cache_path], archive_name(url))
     remote_file cache do
       source url
       checksum hash
-      not_if { ::File.exist?(marker) }
+      not_if { existing }
     end
     archive_file cache do
       destination new_resource.root
       overwrite true
-      not_if { ::File.exist?(marker) }
+      not_if { existing }
     end
   end
 
@@ -52,16 +62,43 @@ action :install do
     end
   end
   file install_marker do
-    content "#{new_resource.version} #{new_resource.flavor}\n"
+    content lazy {
+      manifest = existing || (before && Mingw::TDMOwnership.build(install_root, before, root_created))
+      "#{JSON.pretty_generate(manifest || {})}\n"
+    }
+    sensitive true
   end
 end
 
-# The caller must dedicate root to this toolchain; unmarked directories are retained.
+# Remove only unchanged files created by this installation. Never recurse over
+# the root: MinGW/MSYS packages and user files may share it.
 action :remove do
   marker = install_marker
-  directory new_resource.root do
-    recursive true
-    action :delete
-    only_if { ::File.exist?(marker) }
+  install_root = new_resource.root
+  manifest = Mingw::TDMOwnership.read(install_root, marker)
+  next unless manifest
+
+  plan = Mingw::TDMOwnership.plan(install_root, manifest)
+  plan[:files].each do |relative|
+    file ::File.join(install_root, relative) do
+      action :delete
+      only_if { Mingw::TDMOwnership.removable_file?(install_root, manifest, relative) }
+    end
   end
+  plan[:directories].each do |relative|
+    directory ::File.join(install_root, relative) do
+      recursive false
+      action :delete
+      only_if { Mingw::TDMOwnership.empty_directory?(install_root, manifest, relative) }
+    end
+  end
+  file marker do
+    action :delete
+  end
+  directory install_root do
+    recursive false
+    action :delete
+    only_if { manifest['root_created'] && Mingw::TDMOwnership.empty_directory?(install_root, manifest) }
+  end
+  Chef::Log.warn('Retained TDM file entries whose content changed or disappeared') unless plan[:preserved].empty?
 end

@@ -16,3 +16,8 @@ end
 describe command('C:/mingw64/bin/hello.exe') do
   its('exit_status') { should eq 0 }
 end
+
+describe command('C:/mingw64/bin/as.exe --version') do
+  its('exit_status') { should eq 0 }
+  its('stdout') { should include '2.25' }
+end

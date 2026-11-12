@@ -7,6 +7,6 @@ describe command('C:/mingw-test-msys2/usr/bin/bash.exe -lc "pacman -Q tree"') do
   its('exit_status') { should eq 1 }
 end
 
-describe command('C:/mingw-test-msys2/usr/bin/bash.exe -lc "pacman -Qgq editors"') do
+describe command('C:/mingw-test-msys2/usr/bin/bash.exe -lc "pacman -Qgq mingw-w64-ucrt-x86_64-vulkan-devel"') do
   its('exit_status') { should eq 1 }
 end

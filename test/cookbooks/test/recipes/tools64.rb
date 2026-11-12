@@ -17,10 +17,18 @@ mingw_get 'msys perl - 64 bit' do
   root root_path
 end
 
+file "#{root_path}/keep-before.txt" do
+  content 'pre-existing user file'
+end
+
 mingw_tdm_gcc 'TDM GCC - 64 bit' do
   version '5.1.0'
   flavor :seh_sjlj_64
   root root_path
+end
+
+file "#{root_path}/keep-after.txt" do
+  content 'user file added after install'
 end
 
 file "#{root_path}/hello.cpp" do
@@ -28,6 +36,7 @@ file "#{root_path}/hello.cpp" do
 end
 execute 'compile TDM C++ exception test' do
   command "\"#{root_path}/bin/g++.exe\" -v \"#{root_path}/hello.cpp\" -o \"#{root_path}/bin/hello.exe\""
-  environment('PATH' => "#{root_path}/bin;#{root_path}/msys/1.0/bin;#{ENV['PATH']}")
+  cwd "#{root_path}\\bin"
+  environment('PATH' => "#{root_path}\\bin;#{root_path}\\msys\\1.0\\bin;#{ENV['PATH']}")
   creates "#{root_path}/bin/hello.exe"
 end

@@ -114,3 +114,46 @@ updates from a query error. Local SDK inspection confirms the lifecycle CLI
 Reviewed follow-up local verification:16 ChefSpec examples pass and Cookstyle29
 files clean. Actual Kitchen loader with CLI test_base_path=test reports zero
 implicit lifecycle profiles and exactly the requested removal profile per suite.
+
+
+## Shared-root ownership correction
+
+The original proposed new TDM remove action recursively deleted a marked root.
+Review correctly rejected it: mingw_get deliberately shares that root, and files
+may predate install or be added/modified later. TDM now snapshots names after
+shared dependencies, records only newly created artifacts with SHA256 and root
+realpath/device/inode/link identity, and uses individual guarded file deletes plus
+nonrecursive empty-directory removal. Pre-existing and modified files remain.
+Unrecognised metadata or redirected roots/parents fail before any deletion plan.
+No recursive root deletion remains. Native helper tests create only their own
+Tempdir files/junctions, and native lifecycle preserves before/after sentinels,
+shared MSYS make and a user-built executable while deleting owned compiler files.
+
+Third run43233451179: default, existing-root upgrade and TDM64 lifecycle passed.
+MSYS partial editors removal correctly refused to break base dependency on nano;
+fixture now uses only Vulkan headers from a six-member optional UCRT Vulkan group,
+leaving loader absent, then removes that partial group without dependency bypass.
+The Database group tests complete-group installation. TDM32 verbose compilation
+gets through cc1plus and reaches its assembler, then exits1. Local PE inspection
+of the official binutils2.25.1 archive shows libiconv-2.dll as its only non-system
+import. Fixture restores the exact backslash PATH and working-directory convention
+for Windows DLL loading; failure-only diagnostics report assembler exit and DLL
+machine type. No speculative compiler/runtime replacement is made.
+
+## File-protection workflow bootstrap
+
+The audited reusable9.0.1 caller uses prevent-file-change v3, which requires
+pull_request_target for untrusted actors. Its transitively audited action at
+440fe0989b54093ce834a504af595ee55967da4d uses GitHub APIs only: no PR checkout,
+execution or shell interpolation. Caller events are opened/reopened/synchronize;
+PR-write permission is scoped to that job. The default-branch target workflow
+bootstraps after this feature merges. Require an actual target-event guard run on
+the generated major release before release merge/publication; a trusted-actor
+legacy fast path is not proof of the new event contract.
+
+Audit pointers rechecked: reusable9.0.1 tag resolves to
+3cdff8f6f62b3db50db18f41b2de281297e355d3; v3 annotated tag resolves to
+440fe0989b54093ce834a504af595ee55967da4d with node24 dist/index.js entrypoint.
+Final ownership follow-up local checks:20 RSpec pass, Cookstyle31 clean,
+Markdown/YAML/actionlint clean. Native ownership regressions and fresh lifecycle
+acceptance must still pass before PR publication or merge.

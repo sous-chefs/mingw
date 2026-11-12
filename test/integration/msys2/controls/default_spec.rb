@@ -12,9 +12,9 @@ describe command('C:/mingw-test-msys2/hello.exe') do
   its('exit_status') { should eq 0 }
 end
 
-describe command('C:/mingw-test-msys2/usr/bin/bash.exe -lc "pacman -Q db gdbm nano"') do
+describe command('C:/mingw-test-msys2/usr/bin/bash.exe -lc "pacman -Q db gdbm mingw-w64-ucrt-x86_64-vulkan-headers"') do
   its('exit_status') { should eq 0 }
 end
-describe command('C:/mingw-test-msys2/usr/bin/bash.exe -lc "pacman -Q emacs"') do
+describe command('C:/mingw-test-msys2/usr/bin/bash.exe -lc "pacman -Q mingw-w64-ucrt-x86_64-vulkan-loader"') do
   its('exit_status') { should eq 1 }
 end
