@@ -1,0 +1,14 @@
+---
+suites:
+  - name: tools64
+    provisioner:
+      named_run_list: remove
+    verifier:
+      inspec_tests:
+        - test/integration/remove
+  - name: msys2
+    provisioner:
+      named_run_list: msys2_remove
+    verifier:
+      inspec_tests:
+        - test/integration/msys2_remove

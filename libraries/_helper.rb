@@ -1,3 +1,7 @@
+# frozen_string_literal: true
+
+require 'uri'
+
 #
 # Cookbook:: mingw
 # Library:: _helper
@@ -25,14 +29,27 @@ module Mingw
 
     def archive_name(source)
       url = ::URI.parse(source)
-      ::File.basename(::URI.unescape(url.path))
+      ::File.basename(URI::DEFAULT_PARSER.unescape(url.path))
     end
 
     def tar_name(source)
       aname = archive_name(source)
       ::File.basename(aname, ::File.extname(aname))
     end
+
+    def mingw_installed_output?(output, constraint = nil)
+      versions = output.scan(/^Installed Version:\s+([^\r\n]+)/).flatten.map(&:strip)
+      !versions.empty? && versions.all? do |installed|
+        installed != 'none' && (!constraint || ::File.fnmatch?("*-#{constraint}*", installed))
+      end
+    end
+
+    def mingw_package_installed?
+      return false unless ::File.exist?(::File.join(new_resource.root, 'bin/mingw-get.exe'))
+
+      package_name, constraint = new_resource.package.split('=', 2)
+      result = shell_out("\"#{::File.join(new_resource.root, 'bin/mingw-get.exe')}\" show #{package_name}")
+      result.exitstatus.zero? && mingw_installed_output?(result.stdout, constraint)
+    end
   end
 end
-
-Chef::Resource.include Mingw::Helper

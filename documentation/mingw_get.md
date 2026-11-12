@@ -1,22 +1,12 @@
 # mingw_get
 
-## Actions
+Installs, upgrades or removes a MinGW package. Provides `mingw_get`.
 
-- `:install` - Installs a mingw package from sourceforge using mingw-get.exe.
-- `:remove` - Uninstalls a mingw package.
-- `:upgrade` - Upgrades a mingw package (even to a lower version).
+Required `root` is the shared MinGW directory. `package` defaults to the resource
+name and accepts the existing MinGW version/wildcard expression. `source` and
+`checksum` control the verified MinGW-get bootstrap ZIP; the legacy 0.6.2 default
+is retained with HTTPS. Native `archive_file` extracts it without seven_zip.
 
-## Parameters
-
-- `package` - A mingw-get package (or meta-package) to fetch and install. You may use a legal package wild-card pattern here if you are installing. This is the name attribute.
-- `root` - The root directory where msys and mingw tools will be installed. This directory must not contain any spaces in order to pacify old posix tools and most Makefiles.
-
-## Examples
-
-To get the core msys developer tools in `C:\mingw32`
-
-```ruby
-mingw_get 'msys-base=2013072300-msys-bin.meta' do
-  root 'C:\mingw32'
-end
-```
+`:install` skips matching installed components; `:upgrade` explicitly requests an
+upgrade. `:remove` does not bootstrap an absent installation and preserves shared
+package-manager files. Invalid shell metacharacters in package names are rejected.

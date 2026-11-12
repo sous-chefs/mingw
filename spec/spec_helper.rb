@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 require 'chefspec'
-require 'chefspec/berkshelf'
+require 'chefspec/policyfile'
 
 RSpec.configure do |config|
   config.platform = 'windows'
-  config.version = '2012R2'
+  config.version = '2022'
 end

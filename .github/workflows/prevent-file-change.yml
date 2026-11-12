@@ -6,8 +6,11 @@ name: prevent-file-change
     types:
       - opened
       - reopened
-      - edited
       - synchronize
+
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
   prevent-file-change:
