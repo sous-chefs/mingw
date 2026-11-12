@@ -22,7 +22,7 @@ describe Mingw::TDMOwnership do
       FileUtils.mkdir_p(File.join(root, 'bin'))
       File.write(File.join(root, 'bin/compiler.exe'), 'compiler')
       File.write(File.join(root, 'existing.txt'), 'updated by install')
-      manifest = described_class.build(root, before, false)
+      manifest = described_class.build(root, before, false, trusted: true)
       expect(manifest['files'].keys).to eq(['bin/compiler.exe'])
       expect(described_class.plan(root, manifest)[:files]).to eq(['bin/compiler.exe'])
 
@@ -41,7 +41,7 @@ describe Mingw::TDMOwnership do
       Dir.mkdir(root)
       before = described_class.inventory(root)
       File.write(File.join(root, 'compiler.exe'), 'compiler')
-      manifest = described_class.build(root, before, true)
+      manifest = described_class.build(root, before, true, trusted: true)
       File.rename(root, moved)
       redirect_directory(root, moved)
       expect { described_class.plan(root, manifest) }.to raise_error(ArgumentError, /identity changed|symlink/)
@@ -59,7 +59,7 @@ describe Mingw::TDMOwnership do
       before = described_class.inventory(root)
       FileUtils.mkdir_p(File.join(root, 'bin'))
       File.write(File.join(root, 'bin/compiler.exe'), 'compiler')
-      manifest = described_class.build(root, before, true)
+      manifest = described_class.build(root, before, true, trusted: true)
       File.rename(File.join(root, 'bin'), File.join(base, 'original-bin'))
       redirect_directory(File.join(root, 'bin'), target)
       expect { described_class.plan(root, manifest) }.to raise_error(ArgumentError, /Redirected|escaped/)
@@ -70,9 +70,21 @@ describe Mingw::TDMOwnership do
   it 'rejects unrecognised manifests and paths outside the managed directory' do
     Dir.mktmpdir('mingw-ownership') do |root|
       expect { described_class.plan(root, {}) }.to raise_error(ArgumentError, /Unrecognised/)
-      manifest = described_class.build(root, described_class.inventory(root), false)
+      manifest = described_class.build(root, described_class.inventory(root), false, trusted: true)
       manifest['files']['../other.txt'] = 'a' * 64
       expect { described_class.plan(root, manifest) }.to raise_error(ArgumentError, /Invalid TDM ownership path/)
+    end
+  end
+
+  it 'rejects a forged receipt in a writable shared root before reading its contents' do
+    Dir.mktmpdir('mingw-forged-receipt') do |root|
+      File.write(File.join(root, 'unrelated.txt'), 'keep')
+      manifest = described_class.build(root, described_class.inventory(root), false, trusted: true)
+      manifest['files']['unrelated.txt'] = Digest::SHA256.hexdigest('keep')
+      marker = File.join(root, 'forged.json')
+      File.write(marker, JSON.generate(manifest))
+      expect { described_class.read(root, marker) }.to raise_error(ArgumentError, /Untrusted TDM receipt location/)
+      expect(File.read(File.join(root, 'unrelated.txt'))).to eq('keep')
     end
   end
 end

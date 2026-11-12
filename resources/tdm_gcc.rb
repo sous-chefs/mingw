@@ -11,16 +11,22 @@ action_class do
   include Mingw::Helper
 
   def install_marker
-    ::File.join(new_resource.root, ".mingw-tdm-#{new_resource.version}-#{new_resource.flavor}")
+    Mingw::TDMReceipt.path(new_resource.root, new_resource.version, new_resource.flavor)
   end
 end
 
 action :install do
   marker = install_marker
   install_root = new_resource.root
-  existing = Mingw::TDMOwnership.read(install_root, marker)
+  runner = method(:shell_out!)
+  existing = Mingw::TDMOwnership.read(install_root, marker, audit: runner)
+  receipt_data = existing
   root_created = !::File.exist?(install_root)
   before = nil
+  ruby_block "prepare protected TDM state for #{install_root}" do
+    block { Mingw::TDMReceipt.audit!(runner, 'ensure') }
+    only_if { existing.nil? }
+  end
   directory new_resource.root do
     recursive true
   end
@@ -34,7 +40,15 @@ action :install do
 
   # Dependencies can share this root; they are not TDM-owned artifacts.
   ruby_block "inventory TDM installation at #{install_root}" do
-    block { before = Mingw::TDMOwnership.inventory(install_root) }
+    block do
+      begin
+        Mingw::TDMReceipt.audit!(runner, 'tree', root: install_root)
+        candidate = Mingw::TDMOwnership.inventory(install_root)
+        before = candidate if candidate[:identity]['inode'].positive?
+      rescue Mixlib::ShellOut::ShellCommandFailed
+        Chef::Log.warn('TDM installation can continue, but this root is not trusted for automatic removal')
+      end
+    end
     only_if { existing.nil? }
   end
 
@@ -61,11 +75,25 @@ action :install do
       end
     end
   end
-  file install_marker do
-    content lazy {
-      manifest = existing || (before && Mingw::TDMOwnership.build(install_root, before, root_created))
-      "#{JSON.pretty_generate(manifest || {})}\n"
-    }
+  ruby_block "record TDM ownership for #{install_root}" do
+    block do
+      receipt_data = Mingw::TDMOwnership.unsupported(install_root, root_created)
+      if before
+        begin
+          Mingw::TDMReceipt.audit!(runner, 'tree', root: install_root)
+          receipt_data = Mingw::TDMOwnership.build(install_root, before, root_created, trusted: true)
+        rescue Mixlib::ShellOut::ShellCommandFailed
+          Chef::Log.warn('TDM removal ownership was not recorded because path permissions are not trusted')
+        end
+      end
+    end
+    only_if { existing.nil? }
+  end
+  file marker do
+    content lazy { "#{JSON.pretty_generate(receipt_data || {})}\n" }
+    owner 'S-1-5-32-544'
+    rights :full_control, ['S-1-5-18', 'S-1-5-32-544']
+    inherits false
     sensitive true
   end
 end
@@ -75,9 +103,12 @@ end
 action :remove do
   marker = install_marker
   install_root = new_resource.root
-  manifest = Mingw::TDMOwnership.read(install_root, marker)
+  runner = method(:shell_out!)
+  manifest = Mingw::TDMOwnership.read(install_root, marker, audit: runner)
   next unless manifest
 
+  Mingw::TDMOwnership.validate!(install_root, manifest, removing: true)
+  Mingw::TDMReceipt.audit!(runner, 'removal', root: install_root, receipt: marker)
   plan = Mingw::TDMOwnership.plan(install_root, manifest)
   plan[:files].each do |relative|
     file ::File.join(install_root, relative) do

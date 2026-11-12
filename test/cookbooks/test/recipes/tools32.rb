@@ -1,6 +1,14 @@
 # frozen_string_literal: true
 
-root_path = "#{ENV['SYSTEMDRIVE']}\\mingw32"
+root_path = "#{ENV['SYSTEMDRIVE']}\\mingw-test-tdm32"
+
+directory root_path do
+  recursive true
+  owner 'S-1-5-32-544'
+  rights :full_control, ['S-1-5-18', 'S-1-5-32-544']
+  rights :read_execute, 'S-1-5-32-545'
+  inherits false
+end
 
 mingw_get 'msys core - 32 bit' do
   package 'msys-base=2013072300-msys-bin.meta'

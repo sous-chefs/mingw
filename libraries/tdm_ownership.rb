@@ -4,13 +4,14 @@ require 'digest'
 require 'find'
 require 'json'
 require_relative '_helper'
+require_relative 'tdm_receipt'
 
 module Mingw
   module TDMOwnership
     def self.identity(root)
       link = ::File.lstat(root).symlink?
       stat = ::File.stat(root)
-      raise ArgumentError, 'Cannot identify the TDM directory' unless stat.directory? && stat.ino.positive?
+      raise ArgumentError, 'Cannot identify the TDM directory' unless stat.directory?
 
       realpath = ::File.realpath(root).tr('\\', '/')
       realpath = realpath.downcase if ::File::ALT_SEPARATOR == '\\'
@@ -40,15 +41,20 @@ module Mingw
       { entries: entries, files: files, directories: directories, identity: identity(root) }
     end
 
-    def self.build(root, before, root_created)
+    def self.build(root, before, root_created, trusted: false)
       after = inventory(root)
       raise ArgumentError, 'TDM root changed during installation' unless before[:identity] == after[:identity]
 
       files = (after[:files] - before[:entries]).to_h do |relative|
         [relative, Digest::SHA256.file(::File.join(root, relative)).hexdigest]
       end
-      { 'schema' => 1, 'root' => after[:identity], 'root_created' => root_created,
+      { 'schema' => 1, 'root' => after[:identity], 'root_created' => root_created, 'removal_supported' => trusted,
         'files' => files, 'directories' => after[:directories] - before[:entries] }
+    end
+
+    def self.unsupported(root, root_created)
+      { 'schema' => 1, 'root' => identity(root), 'root_created' => root_created, 'removal_supported' => false,
+        'files' => {}, 'directories' => [] }
     end
 
     def self.relative_path!(relative)
@@ -60,7 +66,8 @@ module Mingw
 
     def self.validate!(root, manifest, removing: false)
       unless manifest.is_a?(Hash) && manifest['schema'] == 1 && manifest['files'].is_a?(Hash) &&
-             manifest['directories'].is_a?(Array) && [true, false].include?(manifest['root_created'])
+             manifest['directories'].is_a?(Array) && [true, false].include?(manifest['root_created']) &&
+             [true, false].include?(manifest['removal_supported'])
         raise ArgumentError, 'Unrecognised TDM ownership manifest; refusing removal'
       end
       validate_root!(root, manifest, removing: removing)
@@ -75,12 +82,19 @@ module Mingw
     def self.validate_root!(root, manifest, removing: false)
       current = identity(root)
       raise ArgumentError, 'TDM root identity changed; refusing removal' unless current == manifest['root']
+      if removing && (!manifest['removal_supported'] || !current['inode'].positive?)
+        raise ArgumentError, 'No trusted TDM deletion ownership was recorded; refusing removal'
+      end
       raise ArgumentError, 'TDM removal through a symlink is not supported' if removing && current['symlink']
     end
 
-    def self.read(root, marker)
+    def self.read(root, marker, audit: nil)
+      Mingw::TDMReceipt.assert_path!(marker)
       return unless ::File.exist?(marker) || ::File.symlink?(marker)
 
+      raise ArgumentError, 'TDM receipt ACL verification is required' unless audit
+
+      Mingw::TDMReceipt.audit!(audit, 'receipt', receipt: marker)
       raise ArgumentError, 'TDM ownership manifest is not a regular file' unless ::File.lstat(marker).file? && !::File.symlink?(marker)
 
       manifest = JSON.parse(::File.read(marker))

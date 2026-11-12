@@ -33,3 +33,8 @@ added later are retained. Only unchanged owned files and empty owned directories
 are removed. Whole-root recursive deletion is never used. Redirected paths and
 unrecognised ownership fail safely. Older installations are not silently adopted
 for deletion. See [TDM resource documentation](documentation/mingw_tdm_gcc.md).
+
+TDM ownership receipts now use protected ProgramData state. Installation in
+shared roots remains supported; automatic removal fails safely when root/state
+ownership or Windows ACL trust cannot be established. Root-local receipts are
+not adopted. See the TDM resource documentation for the required trust model.
