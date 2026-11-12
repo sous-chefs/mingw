@@ -2,6 +2,23 @@
 
 This file is used to list changes made in each version of the mingw cookbook.
 
+## [5.0.0](https://github.com/sous-chefs/mingw/compare/v4.0.6...v5.0.0) (2026-11-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* migrate mingw to custom resources ([#76](https://github.com/sous-chefs/mingw/issues/76))
+
+### Features
+
+* migrate mingw to custom resources ([#76](https://github.com/sous-chefs/mingw/issues/76)) ([bdbf89a](https://github.com/sous-chefs/mingw/commit/bdbf89a5183db7ed756f1337a2102c5f97dea203))
+
+
+### Bug Fixes
+
+* **ci:** Update workflows to use release pipeline ([#58](https://github.com/sous-chefs/mingw/issues/58)) ([d598c33](https://github.com/sous-chefs/mingw/commit/d598c330ba64caed430978373223fd8d9b9a4e27))
+* repair workflow actionlint failures ([#67](https://github.com/sous-chefs/mingw/issues/67)) ([db9a06c](https://github.com/sous-chefs/mingw/commit/db9a06c0b08bad001d9c106885ac09fe0968b936))
+
 ## [4.0.6](https://github.com/sous-chefs/mingw/compare/v4.0.5...v4.0.6) (2025-10-16)
 
 
