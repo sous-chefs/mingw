@@ -1,27 +1,50 @@
 ---
 driver:
-  name: vagrant
-
+  name: exec
+transport:
+  name: exec
 provisioner:
-  name: chef_zero
-
-# Uncomment the following verifier to leverage Inspec instead of Busser (the
-# default verifier)
-# verifier:
-#   name: inspec
-
+  name: chef_infra
+  product_name: cinc
+  product_version: latest
+  chef_license: accept-no-persist
+  multiple_converge: 2
+  enforce_idempotency: true
+  deprecations_as_errors: true
+verifier:
+  name: inspec
 platforms:
-  - name: windows-2012r2
-    driver_config:
-      box: tas50/windows_2012r2
-
+  - name: windows-2025
 suites:
+  - name: default
+    provisioner:
+      named_run_list: default
+    verifier:
+      inspec_tests:
+        - test/integration/default
   - name: tools32
-    run_list:
-      - recipe[mingw_tdm_install::install32]
+    provisioner:
+      named_run_list: tools32
+    verifier:
+      inspec_tests:
+        - test/integration/tools32
   - name: tools64
-    run_list:
-      - recipe[mingw_tdm_install::install64]
-  - name: msys2_tools64
-    run_list:
-      - recipe[mingw_msys2_install::default]
+    provisioner:
+      named_run_list: tools64
+    verifier:
+      inspec_tests:
+        - test/integration/tools64
+  - name: msys2
+    provisioner:
+      named_run_list: msys2
+    verifier:
+      inspec_tests:
+        - test/integration/msys2
+  - name: upgrade
+    provisioner:
+      named_run_list: upgrade
+      multiple_converge: 1
+      enforce_idempotency: false
+    verifier:
+      inspec_tests:
+        - test/integration/upgrade

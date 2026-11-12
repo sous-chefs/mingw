@@ -4,7 +4,7 @@ name: ci
 "on":
   pull_request:
   push:
-    branches: [main]
+    branches: [main, feat/mingw-resource-migration]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
@@ -24,30 +24,51 @@ jobs:
     needs: lint-unit
     runs-on: windows-2025
     strategy:
-      matrix:
-        os:
-          - "windows-2019"
-        suite:
-          - "tools32"
-          - "tools64"
-          - "msys2-tools64"
       fail-fast: false
+      matrix:
+        suite: [default, tools32, tools64, msys2, upgrade]
     steps:
-      - name: Check out code
-        uses: actions/checkout@v7
-      - name: Install Chef
-        uses: actionshub/chef-install@main
-      - name: test-kitchen
-        uses: actionshub/test-kitchen@main
+      - uses: actions/checkout@v7
+      - name: Install Cinc Workstation
+        shell: pwsh
+        run: |
+          $installer = Join-Path $env:RUNNER_TEMP 'install-cinc.ps1'
+          Invoke-WebRequest -Uri 'https://omnitruck.cinc.sh/install.ps1' -OutFile $installer
+          . $installer
+          install -project cinc-workstation -version latest
+          "$env:SystemDrive\cinc-project\cinc-workstation\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Validate native path and receipt trust guards
+        run: chef exec rspec spec/helpers_spec.rb spec/msys2_helper_spec.rb spec/tdm_ownership_spec.rb spec/tdm_receipt_spec.rb
+      - name: Install Policyfile
+        run: chef install Policyfile.rb
+      - name: Test native Windows toolchain
         env:
           CHEF_LICENSE: accept-no-persist
           KITCHEN_LOCAL_YAML: kitchen.exec.yml
-        with:
-          suite: ${{ matrix.suite }}
-          os: ${{ matrix.os }}
-
-  final:
-    runs-on: ubuntu-latest
-    needs: [integration]
-    steps:
-      - run: echo "integration completed"
+        run: chef exec kitchen test ${{ matrix.suite }}-windows-2025
+      - name: Verify removal lifecycle
+        if: matrix.suite == 'tools64' || matrix.suite == 'msys2'
+        env:
+          CHEF_LICENSE: accept-no-persist
+          KITCHEN_YAML: kitchen.lifecycle.yml
+          KITCHEN_LOCAL_YAML: kitchen.exec.yml
+        run: |
+          chef exec kitchen converge ${{ matrix.suite }}-windows-2025
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          chef exec kitchen verify ${{ matrix.suite }}-windows-2025 --test-base-path test
+      - name: Capture legacy assembler loader evidence
+        if: failure() && matrix.suite == 'tools32'
+        shell: pwsh
+        run: |
+          if (Test-Path C:\mingw-test-tdm32\bin) {
+            $env:PATH = 'C:\mingw-test-tdm32\bin;C:\mingw-test-tdm32\msys\1.0\bin;' + $env:PATH
+            Get-ChildItem C:\mingw-test-tdm32\bin\*.dll | Select-Object Name
+            & C:\mingw-test-tdm32\mingw32\bin\as.exe --version
+            Write-Host "Assembler exit: $LASTEXITCODE"
+            $iconv = 'C:\mingw-test-tdm32\bin\libiconv-2.dll'
+            if (Test-Path $iconv) {
+              $bytes = [IO.File]::ReadAllBytes($iconv)
+              $offset = [BitConverter]::ToInt32($bytes, 60)
+              Write-Host ('libiconv PE machine: 0x{0:x}' -f [BitConverter]::ToUInt16($bytes, $offset + 4))
+            }
+          }

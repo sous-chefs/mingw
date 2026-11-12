@@ -1,113 +1,135 @@
-#
-# Cookbook:: mingw
-# Resource:: tdm_gcc
-#
-# Copyright:: 2016-2019, Chef Software, Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
+# frozen_string_literal: true
 
-# Installs a gcc based C/C++ compiler and runtime from TDM GCC.
+provides :mingw_tdm_gcc
 unified_mode true
 
-property :flavor, Symbol, is: [:sjlj_32, :seh_sjlj_64], default: :seh_sjlj_64
-property :root, String, required: true
-property :version, String, is: ['5.1.0'], name_property: true
+property :flavor, Symbol, equal_to: [:sjlj_32, :seh_sjlj_64], default: :seh_sjlj_64
+use '_partial/_root'
+property :version, String, equal_to: ['5.1.0'], name_property: true
 
-tdm_gcc_64 = {
-  'http://iweb.dl.sourceforge.net/project/tdm-gcc/TDM-GCC%205%20series/5.1.0-tdm64-1/gcc-5.1.0-tdm64-1-core.tar.lzma' =>
-    '29393aac890847089ad1e93f81a28f6744b1609c00b25afca818f3903e42e4bd',
-  'http://iweb.dl.sourceforge.net/project/tdm-gcc/MinGW-w64%20runtime/GCC%205%20series/mingw64runtime-v4-git20150618-gcc5-tdm64-1.tar.lzma' =>
-    '29186e0bb36824b10026d78bdcf238d631d8fc1d90718d2ebbd9ec239b6f94dd',
-  'http://iweb.dl.sourceforge.net/project/tdm-gcc/GNU%20binutils/binutils-2.25-tdm64-1.tar.lzma' =>
-    '4722bb7b4d46cef714234109e25e5d1cfd29f4e53365b6d615c8a00735f60e40',
-  'http://iweb.dl.sourceforge.net/project/tdm-gcc/TDM-GCC%205%20series/5.1.0-tdm64-1/gcc-5.1.0-tdm64-1-c%2B%2B.tar.lzma' =>
-    '17fd497318d1ac187a113e8665330d746ad9607a0406ab2374db0d8e6f4094d1',
-}
+action_class do
+  include Mingw::Helper
 
-tdm_gcc_32 = {
-  'http://iweb.dl.sourceforge.net/project/tdm-gcc/TDM-GCC%205%20series/5.1.0-tdm-1%20SJLJ/gcc-5.1.0-tdm-1-core.tar.lzma' =>
-    '9199e6ecbce956ff4704b52098beb38e313176ace610285fb93758a08752870e',
-  'http://iweb.dl.sourceforge.net/project/tdm-gcc/TDM-GCC%205%20series/5.1.0-tdm-1%20SJLJ/gcc-5.1.0-tdm-1-c%2B%2B.tar.lzma' =>
-    '19fe46819ce43531d066b438479300027bbf06da57e8a10be5100466f80c28fc',
-}
+  def install_marker
+    Mingw::TDMReceipt.path(new_resource.root, new_resource.version, new_resource.flavor)
+  end
+end
 
 action :install do
-  cache_dir = ::File.join(root, '.cache')
-  f_root = win_friendly_path(root)
-
-  if flavor == :sjlj_32
-    [
-      'binutils-bin=2.25.1',
-      'libintl-dll=0.18.3.2',
-      'mingwrt-dll=3.21.1',
-      'mingwrt-dev=3.21.1',
-      'w32api-dev=3.17',
-    ].each do |package_fragment|
-      mingw_get "install #{package_fragment} at #{f_root}" do
-        package "mingw32-#{package_fragment}-*"
+  marker = install_marker
+  install_root = new_resource.root
+  runner = method(:shell_out!)
+  existing = Mingw::TDMOwnership.read(install_root, marker, audit: runner)
+  receipt_data = existing
+  root_created = !::File.exist?(install_root)
+  before = nil
+  ruby_block "prepare protected TDM state for #{install_root}" do
+    block { Mingw::TDMReceipt.audit!(runner, 'ensure') }
+    only_if { existing.nil? }
+  end
+  directory new_resource.root do
+    recursive true
+  end
+  if new_resource.flavor == :sjlj_32
+    %w(binutils-bin=2.25.1 libintl-dll=0.18.3.2 mingwrt-dll=3.21.1 mingwrt-dev=3.21.1 w32api-dev=3.17).each do |fragment|
+      mingw_get "mingw32-#{fragment}-*" do
         root new_resource.root
       end
     end
   end
 
-  to_fetch =
-    case flavor
-    when :sjlj_32
-      tdm_gcc_32
-    when :seh_sjlj_64
-      tdm_gcc_64
-    else
-      raise "Unknown flavor: #{flavor}"
+  # Dependencies can share this root; they are not TDM-owned artifacts.
+  ruby_block "inventory TDM installation at #{install_root}" do
+    block do
+      begin
+        Mingw::TDMReceipt.audit!(runner, 'tree', root: install_root)
+        candidate = Mingw::TDMOwnership.inventory(install_root)
+        before = candidate if candidate[:identity]['inode'].positive?
+      rescue Mixlib::ShellOut::ShellCommandFailed
+        Chef::Log.warn('TDM installation can continue, but this root is not trusted for automatic removal')
+      end
     end
+    only_if { existing.nil? }
+  end
 
-  to_fetch.each do |url, hash|
-    seven_zip_archive "cache #{archive_name(url)} to #{win_friendly_path(cache_dir)}" do
+  archives = new_resource.flavor == :sjlj_32 ? Mingw::TDM_GCC_32 : Mingw::TDM_GCC_64
+  archives.each do |url, hash|
+    cache = ::File.join(Chef::Config[:file_cache_path], archive_name(url))
+    remote_file cache do
       source url
-      path cache_dir
       checksum hash
-      overwrite true
+      not_if { existing }
     end
-
-    seven_zip_archive "extract #{tar_name(url)} to #{f_root}" do
-      source ::File.join(cache_dir, tar_name(url))
-      path root
+    archive_file cache do
+      destination new_resource.root
       overwrite true
+      not_if { existing }
     end
   end
 
-  # Patch time.h headers for compatibility with winpthreads.
-  # These patches were made for binutils 2.25.1 for 32-bit TDM GCC only.
-  if flavor == :sjlj_32
-    include_dir = win_friendly_path(::File.join(root, 'include'))
-    cookbook_file "#{include_dir}\\pthread.h" do
-      cookbook 'mingw'
-      source 'pthread.h'
+  if new_resource.flavor == :sjlj_32
+    %w(pthread.h time.h).each do |header|
+      template ::File.join(new_resource.root, 'include', header) do
+        cookbook 'mingw'
+        source "#{header}.erb"
+      end
     end
-
-    cookbook_file "#{include_dir}\\time.h" do
-      cookbook 'mingw'
-      source 'time.h'
+  end
+  ruby_block "record TDM ownership for #{install_root}" do
+    block do
+      receipt_data = Mingw::TDMOwnership.unsupported(install_root, root_created)
+      if before
+        begin
+          Mingw::TDMReceipt.audit!(runner, 'tree', root: install_root)
+          receipt_data = Mingw::TDMOwnership.build(install_root, before, root_created, trusted: true)
+        rescue Mixlib::ShellOut::ShellCommandFailed
+          Chef::Log.warn('TDM removal ownership was not recorded because path permissions are not trusted')
+        end
+      end
     end
+    only_if { existing.nil? }
+  end
+  file marker do
+    content lazy { "#{JSON.pretty_generate(receipt_data || {})}\n" }
+    owner 'S-1-5-32-544'
+    rights :full_control, ['S-1-5-18', 'S-1-5-32-544']
+    inherits false
+    sensitive true
   end
 end
 
-def archive_name(source)
-  url = ::URI.parse(source)
-  ::File.basename(::URI.unescape(url.path))
-end
+# Remove only unchanged files created by this installation. Never recurse over
+# the root: MinGW/MSYS packages and user files may share it.
+action :remove do
+  marker = install_marker
+  install_root = new_resource.root
+  runner = method(:shell_out!)
+  manifest = Mingw::TDMOwnership.read(install_root, marker, audit: runner)
+  next unless manifest
 
-def tar_name(source)
-  aname = archive_name(source)
-  ::File.basename(aname, ::File.extname(aname))
+  Mingw::TDMOwnership.validate!(install_root, manifest, removing: true)
+  Mingw::TDMReceipt.audit!(runner, 'removal', root: install_root, receipt: marker)
+  plan = Mingw::TDMOwnership.plan(install_root, manifest)
+  plan[:files].each do |relative|
+    file ::File.join(install_root, relative) do
+      action :delete
+      only_if { Mingw::TDMOwnership.removable_file?(install_root, manifest, relative) }
+    end
+  end
+  plan[:directories].each do |relative|
+    directory ::File.join(install_root, relative) do
+      recursive false
+      action :delete
+      only_if { Mingw::TDMOwnership.empty_directory?(install_root, manifest, relative) }
+    end
+  end
+  file marker do
+    action :delete
+  end
+  directory install_root do
+    recursive false
+    action :delete
+    only_if { manifest['root_created'] && Mingw::TDMOwnership.empty_directory?(install_root, manifest) }
+  end
+  Chef::Log.warn('Retained TDM file entries whose content changed or disappeared') unless plan[:preserved].empty?
 end
